@@ -1,0 +1,11 @@
+@import "styles/themes.scss";
+@import "styles/variables.scss";
+
+.ant-menu-overflow,
+.ant-menu-overflow-item{
+    background-color: var(--color-primary-5) !important;
+}
+
+.ant-menu-item-selected{
+    color: var(--color-primary-1) !important;
+}
