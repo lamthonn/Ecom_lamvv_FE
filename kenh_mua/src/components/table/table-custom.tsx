@@ -17,7 +17,7 @@ import {
   WarningOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
-import { jwtDecode } from "jwt-decode";
+// import { jwtDecode } from "jwt-decode";
 import React, { useEffect, useState } from "react";
 import ButtonCustom from "../button/button";
 import { axiosConfig } from "../../config/configApi";
@@ -131,14 +131,14 @@ const TableCustom: React.FC<TableCustomProps> = ({
   const [totalRecord, setTotalRecord] = useState<number>(1);
 
   const navigate = useNavigate();
-  useEffect(() => {
-    const authValue = localStorage.getItem("auth");
+  // useEffect(() => {
+  //   const authValue = localStorage.getItem("auth");
 
-    if (authValue) {
-      const decoded = jwtDecode(authValue);
-      setAuth(decoded);
-    }
-  }, []);
+  //   if (authValue) {
+  //     const decoded = jwtDecode(authValue);
+  //     setAuth(decoded);
+  //   }
+  // }, []);
 
   //get data
   const getData = (curentPage: number, pageSize: number) => {

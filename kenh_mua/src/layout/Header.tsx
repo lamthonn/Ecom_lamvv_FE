@@ -5,6 +5,7 @@ import { menuItem } from "../config";
 import { useNavigate } from "react-router-dom";
 import { routesConfig } from "../routes/routes";
 import { DownOutlined, ShoppingCartOutlined, UserOutlined } from '@ant-design/icons';
+import ShowToast from "../components/show-toast/ShowToast";
 
 
 const HeaderLayout: React.FC = () => {
@@ -22,6 +23,14 @@ const HeaderLayout: React.FC = () => {
     }
   };
 
+    const handleLogout = () => {
+      console.log("Đăng xuất")
+        localStorage.removeItem("auth");
+        ShowToast("success", "Đăng xuất thành công", "Hẹn gặp lại bạn sau!");
+        navigate("/");
+        
+    };
+
   const items: MenuProps['items'] = [
     {
         label: (
@@ -35,6 +44,11 @@ const HeaderLayout: React.FC = () => {
         ),
         key: '0',
     },
+    {
+      key: 'dang-xuat',
+      label: 'Đăng xuất',
+      onClick: handleLogout,
+  }
   ];
 
   return (
