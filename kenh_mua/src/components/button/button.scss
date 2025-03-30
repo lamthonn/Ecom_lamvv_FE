@@ -1,3 +1,15 @@
+.btn-custom-default{
+    border: 1px solid var(--color-primary-6);
+    color: white;
+    background-color: var(--color-primary-6);
+}
+
+.btn-custom-default:hover{
+    border: 1px solid var(--color-primary-9) !important;
+    color: white;
+    background-color: var(--color-primary-9) !important;
+}
+
 .ant-btn-variant-outlined{
     border: 1px solid var(--color-primary-6);
     color: var(--color-primary-6);
