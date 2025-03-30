@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Layout, Menu, Carousel, Card, Row, Col, Button, Spin } from "antd";
+import { Layout, Menu, Carousel, Card, Row, Col, Button, Spin, Typography } from "antd";
 import { BASE_URL } from "../../config/configApi";
 import { GetAllDanhMucSanPham, GetAllSanPham } from "../../services/SanPham";
-
+import "./index.scss"
 const { Content } = Layout;
 const { Meta } = Card;
+const { Title, Paragraph } = Typography;
 
 const TrangChu: React.FC = () => {
     const [categories, setCategories] = useState<any[]>([]);
@@ -12,11 +13,13 @@ const TrangChu: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [selectedCategory, setSelectedCategory] = useState<string>("");
+    const [totalProducts, setTotalProducts] = useState(0);
     
     const getSanPham = async (pageNumber: number, danhMucId: string) => {
         setLoading(true);
         try {
             const res = await GetAllSanPham(pageNumber, 10, danhMucId);
+            setTotalProducts(res.data.total);
             if (pageNumber === 1) {
                 setProducts(res.data.items);
             } else {
@@ -55,46 +58,66 @@ const TrangChu: React.FC = () => {
     };
 
     return (
-        <>
-            <Content style={{ padding: "20px", background: "#f5f5f5" }}>
-                <Carousel autoplay>
-                    <div><img src="/images/logo2.png" alt="Banner 1" style={{ width: "100%", height: "300px" }} /></div>
-                    <div><img src="/images/logo2.png" alt="Banner 2" style={{ width: "100%", height: "300px" }} /></div>
-                </Carousel>
+        <Content style={{ padding: "20px", background: "#f0f2f5" }}>
+            {/* Banner */}
+            <Carousel autoplay>
+                <div><img src="/images/logo2.png" alt="Banner 1" style={{ width: "100%", height: "300px" }} /></div>
+                <div><img src="/images/logo2.png" alt="Banner 2" style={{ width: "100%", height: "300px" }} /></div>
+            </Carousel>
 
-                <h2 style={{ marginTop: "20px" }}>Danh mục sản phẩm</h2>
-                <Row gutter={[16, 16]}>
-                    {categories.map(category => (
-                        <Col span={6} key={category.id}>
-                            <Button block onClick={() => handleCategoryClick(category.id)} type={selectedCategory === category.id ? "primary" : "default"}>
-                                {category.ten_danh_muc}
-                            </Button>
-                        </Col>
-                    ))}
-                </Row>
+            {/* Giới thiệu website */}
+            <div style={{ textAlign: "center", margin: "40px 0" }}>
+                <Title level={2}>Chào mừng đến với cửa hàng của chúng tôi</Title>
+                <Paragraph style={{ fontSize: "16px", color: "#555" }}>
+                    Chúng tôi mang đến cho bạn những sản phẩm chất lượng, giá cả hợp lý và dịch vụ tận tâm nhất. Hãy trải nghiệm mua sắm tuyệt vời ngay hôm nay!
+                </Paragraph>
+            </div>
 
-                <h2 style={{ marginTop: "20px" }}>Sản phẩm nổi bật</h2>
-                {loading && page === 1 ? <Spin size="large" style={{ display: "block", margin: "20px auto" }} /> : (
-                    <>
-                        <Row gutter={[16, 16]}>
-                            {products.map(product => (
-                                <Col span={6} key={product.id}>
-                                    <Card 
-                                        cover={<img alt={product.ten_san_pham} src={`${BASE_URL}/san_pham/${product.image}`} />}
-                                        actions={[<Button type="primary">Mua ngay</Button>]}
-                                    >
-                                        <Meta title={product.ten_san_pham} description={`Giá: ${product.gia}đ`} />
-                                    </Card>
-                                </Col>
-                            ))}
-                        </Row>
+            {/* Danh mục sản phẩm */}
+            <h2>Danh mục sản phẩm</h2>
+            <Row gutter={[16, 16]}>
+                {categories.map(category => (
+                    <Col span={6} key={category.id}>
+                        <Button 
+                            block 
+                            onClick={() => handleCategoryClick(category.id)} 
+                            type={selectedCategory === category.id ? "primary" : "default"}
+                            style={{ transition: "0.3s", fontWeight: "bold" }}
+                        >
+                            {category.ten_danh_muc}
+                        </Button>
+                    </Col>
+                ))}
+            </Row>
+
+            {/* Sản phẩm nổi bật */}
+            <h2 style={{ marginTop: "20px" }}>Sản phẩm nổi bật</h2>
+            {loading && page === 1 ? <Spin size="large" style={{ display: "block", margin: "20px auto" }} /> : (
+                <>
+                    <Row gutter={[16, 16]}>
+                        {products.map(product => (
+                            <Col span={6} key={product.id}>
+                                <Card 
+                                    cover={<img alt={product.ten_san_pham} src={`${BASE_URL}/${product.duongDanAnh}`} style={{ transition: "0.3s", cursor: "pointer" }} />}
+                                    hoverable
+                                    actions={[<Button type="primary">Mua ngay</Button>]}
+                                >
+                                    <Meta title={product.ten_san_pham} description={`Giá: ${product.gia}đ`} />
+                                </Card>
+                            </Col>
+                        ))}
+                    </Row>
+                    {/* Ẩn nút nếu số sản phẩm hiện tại không chia hết cho 10 */}
+                    {products.length % 10 === 0 && products.length < totalProducts && (
                         <div style={{ textAlign: "center", marginTop: "20px" }}>
                             <Button type="primary" onClick={handleLoadMore} loading={loading}>Xem thêm</Button>
                         </div>
-                    </>
-                )}
-            </Content>
-        </>
+                    )}
+                </>
+            )}
+
+            
+        </Content>
     );
 }
 export default TrangChu;

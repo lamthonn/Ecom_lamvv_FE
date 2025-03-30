@@ -1,0 +1,48 @@
+.trang-chu-content {
+    padding: 20px;
+    background: #f9f9f9;
+    text-align: center;
+}
+
+.carousel-banner .carousel-item img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.intro-section {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.category-row {
+    margin-bottom: 20px;
+}
+
+.category-btn {
+    transition: all 0.3s ease-in-out;
+}
+
+.category-btn:hover, .category-btn.active {
+    background-color: #1890ff !important;
+    color: white !important;
+}
+
+.product-card {
+    transition: transform 0.3s ease-in-out;
+}
+
+.product-card:hover {
+    transform: scale(1.05);
+}
+
+.loading-spinner {
+    display: block;
+    margin: 20px auto;
+}
+
+.load-more-btn {
+    text-align: center;
+    margin-top: 20px;
+}
