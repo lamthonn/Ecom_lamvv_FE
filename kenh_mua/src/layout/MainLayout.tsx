@@ -36,7 +36,7 @@ const MainLayout: React.FC<{children?: React.ReactNode, breadcrumb: string[] }> 
           style={{
             backgroundColor: "#FFFFFF",
             minHeight: "75vh",
-            padding: 24,
+            // padding: 24,
             borderRadius: 5,
           }}
         >
