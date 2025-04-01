@@ -3,6 +3,7 @@ export const routesConfig = {
     trangChu: "/trang-chu",
     //Cửa hàng
     cuaHang: "/cua-hang",
+    chiTietSanPham:"/chi-tiet-san-pham/:ma",
     //Giỏ hàng
     gioHang: "/gio-hang",
     

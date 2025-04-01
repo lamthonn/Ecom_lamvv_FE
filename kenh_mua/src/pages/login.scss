@@ -2,4 +2,9 @@
     .bottom-text{
         margin-top: 16px;
     }
+    .login-form{
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
 }

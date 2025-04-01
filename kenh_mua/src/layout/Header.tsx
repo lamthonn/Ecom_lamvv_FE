@@ -1,15 +1,38 @@
-import { Avatar, Dropdown, Menu, MenuProps, Space, Tooltip } from "antd";
+import { Avatar, Button, Dropdown, Menu, MenuProps, Space, Tooltip } from "antd";
 import { Header } from "antd/es/layout/layout";
-import React, { FC } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { menuItem } from "../config";
 import { useNavigate } from "react-router-dom";
 import { routesConfig } from "../routes/routes";
-import { DownOutlined, ShoppingCartOutlined, UserOutlined } from '@ant-design/icons';
+import {
+  DownOutlined,
+  ShoppingCartOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import ShowToast from "../components/show-toast/ShowToast";
-
-
-const HeaderLayout: React.FC = () => {
+import LoginPage from "../pages/login";
+import ButtonCustom from "../components/button/button";
+import RegisterPage from "../pages/register";
+type HeaderLayoutProps = {
+  setLoading?:(va:boolean) => void
+}
+const HeaderLayout: React.FC<HeaderLayoutProps> = ({setLoading}) => {
   const navigate = useNavigate();
+  const [auth, setAuth] = useState<any>();
+
+  useEffect(()=> {
+    const checkAuth = localStorage.getItem("auth")
+    if(checkAuth){
+      setAuth(checkAuth);
+    }
+  },[])
+  //xác thực
+  const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
+  const [isLoginModalVisibleReg, setIsLoginModalVisibleReg] = useState(false);
+
+  const showLoginModal = () => {
+    setIsLoginModalVisible(true);
+  };
 
   const handleChangeMenu: MenuProps["onClick"] = (item: any) => {
     if (item.key === "trang-chu") {
@@ -18,37 +41,37 @@ const HeaderLayout: React.FC = () => {
     if (item.key === "cua-hang") {
       navigate(routesConfig.cuaHang);
     }
-    if (item.key === "test-component") {
-      navigate(routesConfig.testComponent);
+    if (item.key === "gio-hang") {
+      const auth = localStorage.getItem("auth");
+      if (!auth) {
+        showLoginModal();
+      } else {
+        navigate(routesConfig.gioHang);
+      }
     }
   };
 
-    const handleLogout = () => {
-      console.log("Đăng xuất")
-        localStorage.removeItem("auth");
-        ShowToast("success", "Đăng xuất thành công", "Hẹn gặp lại bạn sau!");
-        navigate("/");
-        
-    };
+  const handleLogout = () => {
+    localStorage.removeItem("auth");
+    ShowToast("success", "Đăng xuất thành công", "Hẹn gặp lại bạn sau!");
+    navigate("/");
 
-  const items: MenuProps['items'] = [
+  };
+
+  const items: MenuProps["items"] = [
     {
-        label: (
-            <>Thông tin tài khoản</>
-        ),
-        key: '0',
+      label: <>Thông tin tài khoản</>,
+      key: "0",
     },
     {
-        label: (
-            <>Đơn hàng</>
-        ),
-        key: '0',
+      label: <>Đơn hàng</>,
+      key: "1",
     },
     {
-      key: 'dang-xuat',
-      label: 'Đăng xuất',
+      key: "dang-xuat",
+      label: "Đăng xuất",
       onClick: handleLogout,
-  }
+    },
   ];
 
   return (
@@ -63,7 +86,7 @@ const HeaderLayout: React.FC = () => {
         <img
           src="/images/logo_removeBg.png"
           alt="Delias Logo"
-          style={{ width: "10%", margin:"20px 0", color: "#FFF" }}
+          style={{ width: "10%", margin: "20px 0", color: "#FFF" }}
         />
         <Menu
           mode="horizontal"
@@ -72,21 +95,41 @@ const HeaderLayout: React.FC = () => {
           onClick={handleChangeMenu}
           style={{ flex: 1, minWidth: 0 }}
         />
-        
+
         <div className="header-user">
-            <Tooltip title="Giỏ hàng">
-                <Avatar icon={<ShoppingCartOutlined />} style={{ marginRight:"10px", cursor:"pointer"}} onClick={() => {navigate(routesConfig.gioHang)}}/> 
-            </Tooltip>
-            <Dropdown menu={{ items }} trigger={['click']}>
-                <a onClick={(e) => e.preventDefault()}>
-                <Space style={{color:"white"}}>
-                    <Avatar icon={<UserOutlined />} /> 
-                    User Name
+          <Tooltip title="Giỏ hàng">
+            <Avatar
+              icon={<ShoppingCartOutlined />}
+              style={{ marginRight: "10px", cursor: "pointer" }}
+              onClick={() => {
+                const auth = localStorage.getItem("auth");
+                if (!auth) {
+                  showLoginModal();
+                } else {
+                  navigate(routesConfig.gioHang);
+                }
+              }}
+            />
+          </Tooltip>
+          {
+            auth ? (<Dropdown menu={{ items }} trigger={["click"]}>
+              <a onClick={(e) => e.preventDefault()}>
+                <Space style={{ color: "white" }}>
+                  <Avatar icon={<UserOutlined />} />
+                  User Name
                 </Space>
-                </a>
-            </Dropdown>
+              </a>
+            </Dropdown>) : (<div style={{display:"flex", gap:"8px"}}>
+              <ButtonCustom text="Đăng nhập" style={{backgroundColor:"var(--color-primary-9)"}} onClick={()=> setIsLoginModalVisible(true)}/> 
+              <Button onClick={()=> setIsLoginModalVisibleReg(true)}>Đăng ký</Button> 
+            </div>)
+          }
+          
         </div>
       </Header>
+
+      <LoginPage isOpen={isLoginModalVisible} onClose={() => setIsLoginModalVisible(false)} handleCloseModal={setIsLoginModalVisible} setLoading={setLoading}/>
+      <RegisterPage isOpen={isLoginModalVisibleReg} onClose={() => setIsLoginModalVisibleReg(false)} setLoading={setLoading}/>
     </div>
   );
 };

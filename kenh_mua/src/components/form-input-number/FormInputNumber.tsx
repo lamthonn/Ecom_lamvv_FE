@@ -2,7 +2,7 @@ import { FunctionComponent, ReactNode, useState } from "react";
 import "./FormInputNumber.scss";
 import { InputNumber, Form, Typography, Tooltip } from "antd";
 import { InputStatus } from "antd/es/_util/statusUtils";
-import { CloseCircleFilled, CloseCircleOutlined, CloseOutlined } from "@ant-design/icons";
+import { CloseOutlined } from "@ant-design/icons";
 
 type FormInputNumberProps = {
   label?: string | ReactNode; // Thêm prop cho label
