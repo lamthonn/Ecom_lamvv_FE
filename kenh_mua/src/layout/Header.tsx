@@ -62,6 +62,9 @@ const HeaderLayout: React.FC<HeaderLayoutProps> = ({setLoading}) => {
     {
       label: <>Thông tin tài khoản</>,
       key: "0",
+      onClick: () => {
+        navigate("/thong-tin-tai-khoan")
+      }
     },
     {
       label: <>Đơn hàng</>,
