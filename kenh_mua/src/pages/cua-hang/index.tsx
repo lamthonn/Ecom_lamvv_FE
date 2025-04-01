@@ -27,6 +27,7 @@ import FormSelect from "../../components/form-select/FormSelect";
 import { SliderSingleProps } from "antd/lib";
 import { SliderRangeProps } from "antd/es/slider";
 import ButtonCustom from "../../components/button/button";
+import { useNavigate } from "react-router-dom";
 
 const CuaHang: React.FC = () => {
   const [sizes, setSizes] = React.useState<(number | string)[]>([20, 80]);
@@ -38,6 +39,7 @@ const CuaHang: React.FC = () => {
   const [khoang_tien, set_khoang_tien] = useState<number[]>([20000, 10000000]);
   const [danh_muc, set_danh_muc] = useState<string | null>(null);
   const [tu_khoa, set_tu_khoa] = useState<string | string[] | undefined>();
+  const navigate = useNavigate();
 
   //phân trang
   const onChange: PaginationProps["onChange"] = (page) => {
@@ -93,6 +95,10 @@ const CuaHang: React.FC = () => {
       });
   };
 
+  const handleClickProduct = (item:any) => {
+    navigate(`/chi-tiet-san-pham/${item.ma_san_pham}`)
+  }
+
   const formatter: NonNullable<SliderRangeProps["tooltip"]>["formatter"] = (
     value
   ) =>
@@ -101,7 +107,7 @@ const CuaHang: React.FC = () => {
     <div className="ds-san-pham">
       <Spin spinning={loading}>
         <Splitter
-          style={{ boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)" }}
+          style={{ boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)", minHeight:"75vh" }}
           onResize={setSizes}
         >
           <Splitter.Panel
@@ -166,12 +172,15 @@ const CuaHang: React.FC = () => {
               {ProductsData.map((item: any) => {
                 return (
                   <Card
+                    hoverable
+                    onClick={()=> handleClickProduct(item)}
                     style={{
                       width: 250,
                       border: "1px solid rgb(214, 214, 214)",
                     }}
                     cover={
                       <Image
+                        preview={false}
                         alt="example"
                         style={{ border: "1px solid rgb(214, 214, 214)" }}
                         src={`${BASE_URL}/${item.duongDanAnh}`}

@@ -9,6 +9,7 @@ import MainLayout from "../layout/MainLayout";
 import TrangChu from "../pages/trang-chu";
 import CuaHang from "../pages/cua-hang";
 import GioHang from "../pages/gio-hang";
+import ChiTietSanPham from "../pages/cua-hang/chi-tiet-san-pham/chi-tiet";
 
 export const router = createBrowserRouter([
   //người mua
@@ -27,6 +28,14 @@ export const router = createBrowserRouter([
     element: (
       <MainLayout breadcrumb = {["Trang chủ", "Cửa hàng"]}>
         <CuaHang />
+      </MainLayout>
+    )
+  },
+  {
+    path: routesConfig.chiTietSanPham,
+    element: (
+      <MainLayout breadcrumb = {["Trang chủ", "Cửa hàng", "Chi tiết sản phẩm"]}>
+        <ChiTietSanPham />
       </MainLayout>
     )
   },

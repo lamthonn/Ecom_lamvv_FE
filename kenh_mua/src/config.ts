@@ -1,4 +1,4 @@
-import { TeamOutlined, UserOutlined } from "@ant-design/icons";
+import { ShoppingCartOutlined, TeamOutlined, UserOutlined } from "@ant-design/icons";
 import { MenuProps } from "antd";
 import React from 'react';
 
@@ -19,8 +19,8 @@ export const menuItem :MenuProps["items"] = [
       label: "Cửa hàng",
     },
     {
-      key: "test-component",
-      icon: React.createElement(TeamOutlined), 
-      label: "Common Component",
+      key: "gio-hang",
+      icon: React.createElement(ShoppingCartOutlined), 
+      label: "Giỏ hàng",
     },
   ];
