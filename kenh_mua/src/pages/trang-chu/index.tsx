@@ -61,8 +61,8 @@ const TrangChu: React.FC = () => {
         <Content style={{ padding: "20px", background: "#f0f2f5" }}>
             {/* Banner */}
             <Carousel autoplay>
-                <div><img src="/images/logo2.png" alt="Banner 1" style={{ width: "100%", height: "300px" }} /></div>
-                <div><img src="/images/logo2.png" alt="Banner 2" style={{ width: "100%", height: "300px" }} /></div>
+                <div><img src="/images/logo2.png" alt="Banner 1" style={{ width: "100%", height: "500px" }} /></div>
+                <div><img src="/images/logo2.png" alt="Banner 2" style={{ width: "100%", height: "500px" }} /></div>
             </Carousel>
 
             {/* Giới thiệu website */}
@@ -72,7 +72,27 @@ const TrangChu: React.FC = () => {
                     Chúng tôi mang đến cho bạn những sản phẩm chất lượng, giá cả hợp lý và dịch vụ tận tâm nhất. Hãy trải nghiệm mua sắm tuyệt vời ngay hôm nay!
                 </Paragraph>
             </div>
-
+            <section className="hero-section">
+                <div className="hero-content">
+                    <div className="hero-text">
+                    <h1>TUYỂN CHÍNH GỐC ĐỘ, THAO TÁC LINH HOẠT</h1>
+                    <p>
+                        Thay vì những chiến dịch để kiếm tìm hoạt, giới đảm bảo bạn tính tuyển chính về chuyên cao, gốc nghề, xoay, lát màn hình, vụ tà tò không gian, vụ tà hỗ trợ nguồn dùng nghề/dùng làm việc/gia trị dùng tư thế.
+                    </p>
+                    </div>
+                    <div className="hero-image">
+                    {/* Thay thế bằng hình ảnh thực tế */}
+                    <div className="placeholder-image">Hình ảnh minh họa</div>
+                    </div>
+                </div>
+                <div className="info-block">
+                    <h2>GIẢI ĐỒ MÀN HÌNH ĐƠN</h2>
+                    <p>
+                    Thiết bị mạnh để và dịch vụ chính vị trí của 1 màn hình, giúp tạo sự thoải mái, chuyên nghiệp và thẩm mỹ cho không gian. Arm màn hình đơn HyperWork có giá cực KHỬ từ 8,000,000 – 2,000,000.
+                    </p>
+                    <button className="details-button">Xem chi tiết</button>
+                </div>
+                </section>
             {/* Danh mục sản phẩm */}
             <h2>Danh mục sản phẩm</h2>
             <Row gutter={[16, 16]}>
