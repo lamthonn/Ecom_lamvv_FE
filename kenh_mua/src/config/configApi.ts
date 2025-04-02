@@ -57,7 +57,7 @@ axiosConfig.interceptors.response.use(
           localStorage.removeItem("auth");
           await ShowToast("warning", "Thông báo", "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại");
           setTimeout(() => {
-            window.location.href = '/seller-center/login';
+            window.location.reload();
           }, 2000);
         }
         else{
