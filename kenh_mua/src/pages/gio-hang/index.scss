@@ -1,8 +1,8 @@
 .gio-hang-chi-tiet {
-    width: 70%;
-    margin-left: 15%;
-    border-left: 1px solid rgba(204, 203, 203, 0.842);
-    border-right: 1px solid rgba(204, 203, 203, 0.842);
+    // width: 70%;
+    // margin-left: 15%;
+    // border-left: 1px solid rgba(204, 203, 203, 0.842);
+    // border-right: 1px solid rgba(204, 203, 203, 0.842);
     .btn-delete {
         background-color: #ffd7d7;
         border: 1px solid rgb(255, 85, 85);
@@ -18,5 +18,9 @@
         border-radius: 5px;
         cursor: pointer;
         color: white;
+    }
+    .gio-hang-phai{
+        display: flex;
+        gap: 8px;
     }
 }

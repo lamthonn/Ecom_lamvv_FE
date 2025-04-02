@@ -18,23 +18,41 @@ import { CaretLeftOutlined, CaretRightOutlined } from "@ant-design/icons";
 import { InputNumberProps } from "antd/lib";
 import ButtonCustom from "../../../components/button/button";
 import FormInputNumber from "../../../components/form-input-number/FormInputNumber";
+import { jwtDecode, JwtPayload } from "jwt-decode";
+
+interface CustomJwtPayload extends JwtPayload {
+  id?: string;
+}
+
 const ChiTietSanPham: React.FC = () => {
   const { ma } = useParams<{ ma: string }>();
   const [dataDetail, setDataDetail] = useState<any>([]);
   const [images, setImages] = useState<string[]>([]);
   const [rate, setRate] = useState<number>(0);
-
+ const [auth, setAuth] = useState<any>();
+ const [loading, setLoading] = useState<boolean>(false);
+  useEffect(() => {
+    const token = localStorage.getItem("auth");
+    if (token) {
+      var user = jwtDecode<CustomJwtPayload>(JSON.parse(token).token);
+      if (user) {
+        setAuth(user)
+      }
+    }
+  }, []);
   //thông tin mua
   const [soLuong, setSoLuong] = useState<number>(1)
+  const [kich_thuoc, set_kich_thuoc] = useState<string | null>(null)
+  const [mau_sac, set_mau_sac] = useState<string | null>(null)
   useEffect(() => {
     GetById();
   }, []);
 
   const GetById = async () => {
+    setLoading(true)
     await axiosConfig
       .get(`api/DanhSachSanPham/get-by-ma/${ma}`)
       .then((res: any) => {
-        console.log(res.data);
         setDataDetail(res.data);
         setRate(res.data.rate);
         setImages([
@@ -44,12 +62,108 @@ const ChiTietSanPham: React.FC = () => {
       })
       .catch((err: any) => {
         ShowToast("error", "Thông báo", "Lấy dữ liệu thất bại", 3);
-      });
+      })
+      .finally(()=> {
+        setLoading(false)
+      })
   };
 
   const onChange: InputNumberProps["onChange"] = (value: any) => {
     setSoLuong(value)
   };
+
+  const handleChangeBienThe = (items:any, selected:any) => {
+    if(items.ten_phan_loai === "mau-sac"){
+      set_mau_sac(selected)
+    }
+    if(items.ten_phan_loai === "size"){
+      set_kich_thuoc(selected)
+    }
+  }
+
+  const handleThemGioHang = () => {
+    setLoading(true);
+    if (dataDetail.length > 0) {
+      const pl = dataDetail[0].ls_phan_loai;
+      if(pl.length === 2){
+        if(mau_sac === null || mau_sac === undefined){
+          ShowToast("warning","Thông báo", "Bạn chưa chọn màu sắc sản phẩm", 3);
+          return 0;
+        }
+        if(kich_thuoc === null || kich_thuoc === undefined){
+          ShowToast("warning","Thông báo", "Bạn chưa chọn kích thước sản phẩm", 3);
+          return 0;
+        }
+      }
+      else{
+        if(pl.length === 1){
+          if(pl[0].ten_phan_loai === "mau-sac"){
+            if(mau_sac === null || mau_sac === undefined){
+              ShowToast("warning","Thông báo", "Bạn chưa chọn màu sắc sản phẩm", 3);
+              return 0;
+            }
+          }
+
+          if(pl[0].ten_phan_loai === "size"){
+            if(kich_thuoc === null || kich_thuoc === undefined){
+              ShowToast("warning","Thông báo", "Bạn chưa chọn kích thước sản phẩm", 3);
+              return 0;
+            }
+          }
+        }
+      }
+      // Tìm biến thể phù hợp dựa trên mau_sac và kich_thuoc đã chọn
+      let bienThePhuHop;
+  
+      if (mau_sac && kich_thuoc) {
+        // Nếu cả màu sắc và kích thước đều được chọn, tìm biến thể phù hợp
+        bienThePhuHop = dataDetail.find(
+          (item: any) => item.mau_sac === mau_sac && item.size === kich_thuoc
+        );
+      } else if (mau_sac) {
+        // Nếu chỉ màu sắc được chọn, tìm biến thể phù hợp theo màu sắc
+        bienThePhuHop = dataDetail.find(
+          (item: any) => item.mau_sac === mau_sac
+        );
+      } else if (kich_thuoc) {
+        // Nếu chỉ kích thước được chọn, tìm biến thể phù hợp theo kích thước
+        bienThePhuHop = dataDetail.find(
+          (item: any) => item.size === kich_thuoc
+        );
+      } else {
+        // Nếu không có màu sắc và kích thước nào được chọn, lấy biến thể đầu tiên
+        bienThePhuHop = dataDetail[0];
+      }
+  
+      if (bienThePhuHop) {
+        const san_pham_id = bienThePhuHop.id;
+        const data = {
+          nguoi_dung_id: auth.id,
+          san_pham_id: san_pham_id,
+          so_luong: soLuong,
+        };
+        // Gọi API thêm vào giỏ hàng ở đây với data
+        axiosConfig
+          .post("api/gio-hang/created", data)
+          .then(() => {
+            ShowToast("success", "Thông báo", "Thêm giỏ hàng thành công", 3);
+          })
+          .catch(() => {
+            ShowToast("error", "Thông báo", "Có lỗi xảy ra", 3);
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+      } else {
+        ShowToast("error", "Lỗi", "Không tìm thấy biến thể phù hợp", 3);
+        setLoading(false);
+      }
+    } else {
+      ShowToast("error", "Lỗi", "Không tìm thấy thông tin sản phẩm", 3);
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="chi-tiet-san-pham">
       <Splitter
@@ -86,7 +200,6 @@ const ChiTietSanPham: React.FC = () => {
                   style={{
                     width: "100%",
                     height: "100%",
-                    objectFit: "cover",
                     objectPosition: "center",
                     border: "1px solid rgb(214, 214, 214)",
                   }}
@@ -187,7 +300,7 @@ const ChiTietSanPham: React.FC = () => {
                                 label: x,
                               };
                             })}
-                            defaultValue="Apple"
+                            onChange={(value:any) => {handleChangeBienThe(item, value.target.value)}}
                             optionType="button"
                             buttonStyle="solid"
                           />
@@ -215,7 +328,7 @@ const ChiTietSanPham: React.FC = () => {
               </Button>
             </div>
             {/* button */}
-            <Button key={"2"} style={{ height: "34px", width: "50%" }}>
+            <Button key={"2"} style={{ height: "34px", width: "50%" }} onClick={handleThemGioHang}>
               THÊM VÀO GIỎ HÀNG
             </Button>
 

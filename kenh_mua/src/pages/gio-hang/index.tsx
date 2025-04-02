@@ -1,15 +1,21 @@
-import { Avatar, List, Space, Spin, Typography } from "antd";
+import {
+  Spin,
+  Typography,
+  Checkbox,
+  Table,
+  Popconfirm,
+  Affix,
+  Button,
+  Card,
+} from "antd";
 import React, { useEffect, useState } from "react";
-import { DeleteOutlined, LikeOutlined, MessageOutlined, StarOutlined } from "@ant-design/icons";
+import { DeleteOutlined } from "@ant-design/icons";
 import { axiosConfig, BASE_URL } from "../../config/configApi";
 import ShowToast from "../../components/show-toast/ShowToast";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import FormInputNumber from "../../components/form-input-number/FormInputNumber";
 import { useNavigate } from "react-router-dom";
-import { routesConfig } from "../../routes/routes";
-import FormItemInput from "../../components/form-input/FormInput";
-import "./index.scss"
-import ButtonCustom from "../../components/button/button";
+import "./index.scss";
 interface CustomJwtPayload extends JwtPayload {
   id?: string; // hoặc number nếu `dvvc_id` là số
 }
@@ -20,6 +26,7 @@ type ChiTietGioHangProps = {
   san_pham_id?: string;
   so_luong?: number | null;
   san_pham?: SanPhamProps;
+  checked?: boolean; // Thêm trường checked
 };
 type SanPhamProps = {
   id?: string;
@@ -43,11 +50,16 @@ const GioHang: React.FC = () => {
   const navigate = useNavigate();
   const [dataGioHang, setDataGioHang] = useState<ChiTietGioHangProps[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [selectAll, setSelectAll] = useState<boolean>(false);
+  const [selectedRows, setSelectedRows] = useState<any[]>([]);
+  const [auth, setAuth] = useState<any>();
+
   useEffect(() => {
     const token = localStorage.getItem("auth");
     if (token) {
       var user = jwtDecode<CustomJwtPayload>(JSON.parse(token).token);
       if (user) {
+        setAuth(user);
         handleGetAllData(user.id);
       }
     }
@@ -58,7 +70,13 @@ const GioHang: React.FC = () => {
     axiosConfig
       .get(`api/gio-hang/get-all?account_id=${userId}`)
       .then((res: any) => {
-        setDataGioHang(res.data.ds_chi_tiet_gio_hang);
+        const initialData = res.data.ds_chi_tiet_gio_hang.map(
+          (item: ChiTietGioHangProps) => ({
+            ...item,
+            checked: false, // Thêm checked vào mỗi item
+          })
+        );
+        setDataGioHang(initialData);
       })
       .catch((err: any) => {
         ShowToast("error", "Thông báo", "Có lỗi xảy ra", 3);
@@ -68,28 +86,183 @@ const GioHang: React.FC = () => {
       });
   };
 
-  const data = dataGioHang.map((item: any, i: number) => ({
+  const handleSelectAllChange = (e: any) => {
+    const checked = e.target.checked;
+    setSelectAll(checked);
+  
+    if (checked) {
+      // Chọn tất cả các hàng
+      const allSelectedRows = dataGioHang.map((item) => item); // Hoặc bạn có thể chỉ lấy id: dataGioHang.map((item) => item.id);
+      setSelectedRows(allSelectedRows);
+    } else {
+      // Bỏ chọn tất cả các hàng
+      setSelectedRows([]);
+    }
+  };
+
+  const columns = [
+    {
+      title: (
+        <Checkbox
+          checked={selectAll}
+          onChange={handleSelectAllChange}
+        ></Checkbox>
+      ),
+      dataIndex: "checked",
+      render: (checked: boolean, record: any, index: number) => (
+        <Checkbox
+          checked={selectedRows.some((row) => row.id === record.id)} // Kiểm tra xem record có trong selectedRows không
+          onChange={(e) => {
+            const isChecked = e.target.checked;
+            setSelectedRows((prevSelectedRows: any[]) => {
+              if (isChecked) {
+                // Thêm record vào selectedRows nếu chưa có
+                if (!prevSelectedRows.some((row) => row.id === record.id)) {
+                  return [...prevSelectedRows, record];
+                }
+                return prevSelectedRows;
+              } else {
+                // Xóa record khỏi selectedRows
+                return prevSelectedRows.filter((row) => row.id !== record.id);
+              }
+            });
+          }}
+        />
+      ),
+      width: "5%",
+    },
+    {
+      title: "Hình ảnh",
+      dataIndex: "href",
+      render: (href: string) => <img src={href} alt="product" width={"80%"} />,
+      width: "15%",
+    },
+    {
+      title: "Tên sản phẩm",
+      dataIndex: "title",
+      render: (title: any, record: any) => (
+        <a
+          style={{ fontSize: "16px" }}
+          onClick={() => navigate(`/chi-tiet-san-pham/${record.ma_san_pham}`)}
+        >
+          {title}
+        </a>
+      ),
+      width: "20%",
+    },
+    {
+      title: "Giá",
+      dataIndex: "description",
+      render: (description: any) => (
+        <div style={{ fontSize: "16px" }}>{description}</div>
+      ),
+      width: "15%",
+    },
+    {
+      title: "Số lượng",
+      dataIndex: "so_luong",
+      render: (so_luong: number, record: any, index: number) => (
+        <FormInputNumber
+          style={{ width: "100%", fontSize: "16px" }}
+          min={1}
+          max={50}
+          value={so_luong}
+          onChange={(value) => {
+            setLoading(true);
+            const updatedData = [...dataGioHang];
+            updatedData[index].so_luong = value;
+            setDataGioHang(updatedData);
+            axiosConfig
+              .put(`api/gio-hang/edit`, {
+                id: record.id,
+                so_luong: value,
+              })
+              .then(() => {})
+              .catch(() => {
+                ShowToast("error", "Thông báo", "Có lỗi xảy ra", 3);
+                handleGetAllData(auth.id);
+              })
+              .finally(() => {
+                setLoading(false);
+              });
+          }}
+        />
+      ),
+      width: "10%",
+    },
+    {
+      title: "Biến thể",
+      dataIndex: "san_pham",
+      render: (san_pham: SanPhamProps) => (
+        <div
+          style={{
+            fontSize: "16px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "8px",
+          }}
+        >
+          {san_pham?.mau_sac ? `Màu: ${san_pham?.mau_sac}` : ""}
+          {san_pham?.size ? `Màu: ${san_pham?.size}` : ""}
+        </div>
+      ),
+      width: "10%",
+    },
+    {
+      title: "Hành động",
+      render: (record: any, data: any, index: number) => (
+        <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
+          <Popconfirm
+            title="Delete the task"
+            description="Are you sure to delete this task?"
+            icon={<DeleteOutlined style={{ color: "red" }} />}
+            okText="Xóa"
+            cancelText="Hủy"
+            okButtonProps={{
+              style: { backgroundColor: "var(--color-primary-5)" },
+            }}
+            onConfirm={() => {
+              setLoading(true);
+              axiosConfig
+                .delete(`api/gio-hang/delete?id=${record.id}`)
+                .then(() => {
+                  handleGetAllData(auth.id);
+                })
+                .catch(() => {
+                  ShowToast("error", "Thông báo", "Có lỗi xảy ra", 3);
+                })
+                .finally(() => {
+                  setLoading(false);
+                });
+            }}
+          >
+            <div className="btn-delete">
+              <DeleteOutlined />
+            </div>
+          </Popconfirm>
+        </div>
+      ),
+      width: "7%",
+    },
+  ];
+
+  const dataSource = dataGioHang.map((item: any, i: number) => ({
+    key: i.toString(),
+    id: item.id,
     ma_san_pham: item.san_pham.ma_san_pham,
-    // mau_sac: item.san_pham.mau_sac,
-    // kich_thuoc: item.san_pham.size,
     href: `${BASE_URL}/${item.san_pham.duong_dan_anh_bia}`,
-    title: <div style={{ fontSize: "25px" }}>{item.san_pham.ten_san_pham}</div>,
+    title: <div style={{ fontSize: "16px" }}>{item.san_pham.ten_san_pham}</div>,
     description: (
-      <div style={{ fontSize: "20px" }}>
+      <div style={{ fontSize: "16px" }}>
         {item.san_pham.khuyen_mai ? (
           <div>
-            <Typography.Text
-              delete
-              style={{ fontSize: "20px", color: "rgb(140 140 140)" }}
-            >
+            <Typography.Text delete style={{ fontSize: "16px" }}>
               {(item.so_luong * item.san_pham.gia).toLocaleString("vi-VN", {
                 style: "currency",
                 currency: "VND",
               })}
             </Typography.Text>{" "}
-            <Typography.Text
-              style={{ fontSize: "20px", color: "rgb(140 140 140)" }}
-            >
+            <Typography.Text style={{ fontSize: "16px" }}>
               {(item.so_luong * item.san_pham.khuyen_mai).toLocaleString(
                 "vi-VN",
                 {
@@ -107,62 +280,55 @@ const GioHang: React.FC = () => {
         )}
       </div>
     ),
-    content: (
-      <div style={{display:"flex",  gap:"16px", flexDirection:"column"}}>
-        <div style={{display:"flex", width:"50%", gap:"16px", alignItems:"flex-end"}}>
-          <FormInputNumber
-            label={"Số lượng"}
-            value={item.so_luong}
-            onChange={(value) => {
-              const updatedData = [...dataGioHang];
-              updatedData[i].so_luong = value;
-              setDataGioHang(updatedData);
-            }}
-          />
-
-          {item.san_pham.mau_sac ? <FormItemInput value={item.san_pham.mau_sac} disabled={true} label="Màu sắc"/> : ""}
-          {item.san_pham.size ? <FormItemInput value={item.san_pham.size}  disabled={true} label="Kích thước"/> : ""}
-
-          <div className="btn-delete">
-            <DeleteOutlined />
-          </div>
-        </div>
-
-        <div className="btn_thanh_toan">
-          <ButtonCustom text="MUA HÀNG"/>
-        </div>
-      </div>
-    ),
+    so_luong: item.so_luong,
+    san_pham: item.san_pham,
+    checked: item.checked,
   }));
-
+  useEffect(()=> {
+    console.log(selectedRows);
+    
+  },[selectedRows])
+  const tinhTongTienGioHang = (gioHang: any[]) => {
+    let tongTien = 0;
+  
+    gioHang.forEach((item) => {
+      if (item) {
+        // Kiểm tra xem có khuyến mãi không
+        const gia = item.san_pham.khuyen_mai !== null ? item.san_pham.khuyen_mai : item.san_pham.gia;
+  
+        // Tính tổng tiền cho sản phẩm được chọn
+        tongTien += gia * item.so_luong;
+      }
+    });
+  
+    return tongTien.toLocaleString("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    });
+  };
   return (
     <div className="gio-hang-chi-tiet">
       <Spin spinning={loading}>
-        <List
-          itemLayout="vertical"
-          size="large"
-          dataSource={data}
-          renderItem={(item: any) => (
-            <List.Item
-              key={item.title}
-              extra={<img width={272} alt="logo" src={`${item.href}`} />}
-            >
-              <List.Item.Meta
-                title={
-                  <a
-                    onClick={() =>
-                      navigate(`/chi-tiet-san-pham/${item.ma_san_pham}`)
-                    }
-                  >
-                    {item.title}
-                  </a>
-                }
-                description={item.description}
-              />
-              {item.content}
-            </List.Item>
-          )}
+        <Table
+          dataSource={dataSource}
+          columns={columns}
+          rowKey="key"
+          pagination={false}
         />
+        <Affix offsetBottom={10}>
+          <Card style={{ backgroundColor: "var(--color-primary-5)",  }}>
+            <div style={{display:"flex",justifyContent:"space-between"}}>
+            <div className="gio-hang-trai"> 
+              <Checkbox onClick={handleSelectAllChange} style={{ color:"white", fontSize:"16px"}}>Chọn tất cả</Checkbox>
+            </div>
+            <div className="gio-hang-phai" >
+              <Typography.Text style={{ color:"white", fontSize:"16px"}}>Tổng cộng ({selectedRows.length} sản phẩm): </Typography.Text>
+              <Typography.Text style={{ color:"white", fontSize:"20px"}}>{tinhTongTienGioHang(selectedRows)}</Typography.Text>
+              <Button>THANH TOÁN</Button>
+            </div>
+            </div>
+          </Card>
+        </Affix>
       </Spin>
     </div>
   );
