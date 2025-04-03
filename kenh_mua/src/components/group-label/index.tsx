@@ -2,7 +2,7 @@ import { Typography } from "antd";
 import React from "react";
 import "./index.scss";
 type GroupLabelProps = {
-  label?: string;
+  label?: string | React.ReactNode;
   style?: React.CSSProperties;
 };
 

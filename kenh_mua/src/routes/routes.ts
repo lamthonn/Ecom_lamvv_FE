@@ -6,6 +6,8 @@ export const routesConfig = {
     chiTietSanPham:"/chi-tiet-san-pham/:ma",
     //Giỏ hàng
     gioHang: "/gio-hang",
+    //thanh toán
+    thanhToan:"/thanh-toan",
     
     //Common Component
     testComponent: "/test-component",

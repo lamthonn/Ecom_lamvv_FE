@@ -28,6 +28,7 @@ import { SliderSingleProps } from "antd/lib";
 import { SliderRangeProps } from "antd/es/slider";
 import ButtonCustom from "../../components/button/button";
 import { useNavigate } from "react-router-dom";
+import GroupLabel from "../../components/group-label";
 
 const CuaHang: React.FC = () => {
   const [sizes, setSizes] = React.useState<(number | string)[]>([20, 80]);
@@ -43,7 +44,6 @@ const CuaHang: React.FC = () => {
 
   //phân trang
   const onChange: PaginationProps["onChange"] = (page) => {
-    console.log(page);
     setPageIndex(page);
   };
   //get tất cả sản phẩm lần đầu
@@ -117,7 +117,7 @@ const CuaHang: React.FC = () => {
             className="Splitter-left"
           >
             <div className="Splitter-left-content">
-              <Typography.Title level={3} className="Title">
+              <Typography.Title level={3} className="Title" style={{color: "var(--color-primary-8)"}}>
                 <FilterOutlined /> Lọc sản phẩm
               </Typography.Title>
 
@@ -166,7 +166,7 @@ const CuaHang: React.FC = () => {
 
           <Splitter.Panel size={sizes[1]} className="Splitter-right">
             <Typography.Title level={3} className="Title">
-              Kết quả tìm kiếm
+              <GroupLabel label="Kết quả tìm kiếm"/>
             </Typography.Title>
             <div className="Splitter-right-content">
               {ProductsData.map((item: any) => {

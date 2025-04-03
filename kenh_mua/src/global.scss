@@ -1,6 +1,10 @@
 @import "styles/themes.scss";
 @import "styles/variables.scss";
 
+*{
+    font-size: 16px !important;
+}
+
 .ant-menu-overflow,
 .ant-menu-overflow-item{
     background-color: var(--color-primary-5) !important;
@@ -13,3 +17,4 @@
 .ant-form-item{
     margin: 0;
 }
+

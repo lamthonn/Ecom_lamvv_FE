@@ -16,6 +16,7 @@ import { jwtDecode, JwtPayload } from "jwt-decode";
 import FormInputNumber from "../../components/form-input-number/FormInputNumber";
 import { useNavigate } from "react-router-dom";
 import "./index.scss";
+import { routesConfig } from "../../routes/routes";
 interface CustomJwtPayload extends JwtPayload {
   id?: string; // hoặc number nếu `dvvc_id` là số
 }
@@ -324,7 +325,7 @@ const GioHang: React.FC = () => {
             <div className="gio-hang-phai" >
               <Typography.Text style={{ color:"white", fontSize:"16px"}}>Tổng cộng ({selectedRows.length} sản phẩm): </Typography.Text>
               <Typography.Text style={{ color:"white", fontSize:"20px"}}>{tinhTongTienGioHang(selectedRows)}</Typography.Text>
-              <Button>THANH TOÁN</Button>
+              <Button onClick={()=> {navigate(routesConfig.thanhToan, { state: selectedRows })}}>THANH TOÁN</Button>
             </div>
             </div>
           </Card>

@@ -11,7 +11,7 @@ import {
 } from "antd";
 import React, { useEffect, useState } from "react";
 import { axiosConfig, BASE_URL } from "../../../config/configApi";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import "./chi-tiet.scss";
 import ShowToast from "../../../components/show-toast/ShowToast";
 import { CaretLeftOutlined, CaretRightOutlined } from "@ant-design/icons";
@@ -19,6 +19,7 @@ import { InputNumberProps } from "antd/lib";
 import ButtonCustom from "../../../components/button/button";
 import FormInputNumber from "../../../components/form-input-number/FormInputNumber";
 import { jwtDecode, JwtPayload } from "jwt-decode";
+import { routesConfig } from "../../../routes/routes";
 
 interface CustomJwtPayload extends JwtPayload {
   id?: string;
@@ -80,8 +81,8 @@ const ChiTietSanPham: React.FC = () => {
       set_kich_thuoc(selected)
     }
   }
-
-  const handleThemGioHang = () => {
+const navigate = useNavigate();
+  const handleThemGioHang = (type:"mua-ngay" | "them-gio-hang") => {
     setLoading(true);
     if (dataDetail.length > 0) {
       const pl = dataDetail[0].ls_phan_loai;
@@ -141,9 +142,11 @@ const ChiTietSanPham: React.FC = () => {
           nguoi_dung_id: auth.id,
           san_pham_id: san_pham_id,
           so_luong: soLuong,
+          san_pham: bienThePhuHop
         };
         // Gọi API thêm vào giỏ hàng ở đây với data
-        axiosConfig
+        if(type === "them-gio-hang"){
+          axiosConfig
           .post("api/gio-hang/created", data)
           .then(() => {
             ShowToast("success", "Thông báo", "Thêm giỏ hàng thành công", 3);
@@ -154,6 +157,10 @@ const ChiTietSanPham: React.FC = () => {
           .finally(() => {
             setLoading(false);
           });
+        }else{
+          navigate(routesConfig.thanhToan, {state:[data]})
+        }
+        
       } else {
         ShowToast("error", "Lỗi", "Không tìm thấy biến thể phù hợp", 3);
         setLoading(false);
@@ -323,12 +330,15 @@ const ChiTietSanPham: React.FC = () => {
                 }}
                 variant="solid"
                 type="primary"
+                onClick={()=> {
+                  handleThemGioHang("mua-ngay")
+                }}
               >
                 MUA NGAY
               </Button>
             </div>
             {/* button */}
-            <Button key={"2"} style={{ height: "34px", width: "50%" }} onClick={handleThemGioHang}>
+            <Button key={"2"} style={{ height: "34px", width: "50%" }} onClick={()=> handleThemGioHang("them-gio-hang")}>
               THÊM VÀO GIỎ HÀNG
             </Button>
 
