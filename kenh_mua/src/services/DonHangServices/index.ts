@@ -7,3 +7,7 @@ export const GetAllDonHangByUser: (pageNumber: number, pageSize: number) => Prom
 export const GetDonHangById: (id: string) => Promise<AxiosResponse<any>> = (id: string) => {
     return axiosConfig.get(`/api/don-hang/get-don-hang-by-user?id=${id}`);
 };
+
+export const ChuyenTrangThaiDonHang: (id: string, TrangThai: number) => Promise<AxiosResponse<any>> = (id: string, TrangThai: number) => {
+    return axiosConfig.put(`/api/don-hang/chuyen-trang-thai-don-hang?id=${id}&TrangThai=${TrangThai}`);
+};
