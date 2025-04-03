@@ -285,10 +285,7 @@ const GioHang: React.FC = () => {
     san_pham: item.san_pham,
     checked: item.checked,
   }));
-  useEffect(()=> {
-    console.log(selectedRows);
-    
-  },[selectedRows])
+
   const tinhTongTienGioHang = (gioHang: any[]) => {
     let tongTien = 0;
   
@@ -307,6 +304,11 @@ const GioHang: React.FC = () => {
       currency: "VND",
     });
   };
+
+
+  useEffect(()=> {
+    console.log("selectedRows:: ", selectedRows);
+  },[selectedRows])
   return (
     <div className="gio-hang-chi-tiet">
       <Spin spinning={loading}>
@@ -325,8 +327,19 @@ const GioHang: React.FC = () => {
             <div className="gio-hang-phai" >
               <Typography.Text style={{ color:"white", fontSize:"16px"}}>Tổng cộng ({selectedRows.length} sản phẩm): </Typography.Text>
               <Typography.Text style={{ color:"white", fontSize:"20px"}}>{tinhTongTienGioHang(selectedRows)}</Typography.Text>
-              <Button onClick={()=> {navigate(routesConfig.thanhToan, { state: selectedRows })}}>THANH TOÁN</Button>
-            </div>
+              <Button onClick={() => {
+                  const safeSelectedRows = selectedRows.map(row => ({
+                    id_gio_hang: row.id,
+                    href: row.href,
+                    title: row.title.props.children,
+                    gia: row.san_pham.gia,
+                    khuyen_mai:row.san_pham.khuyen_mai,
+                    so_luong: row.so_luong,
+                    mau_sac: row.san_pham.mau_sac,
+                    kich_thuoc:row.san_pham.size,
+                  }));
+                  navigate(routesConfig.thanhToan, { state: safeSelectedRows });
+                }}>THANH TOÁN</Button>            </div>
             </div>
           </Card>
         </Affix>

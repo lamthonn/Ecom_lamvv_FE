@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Row, Col, Button, Typography, Divider, Modal, Form, Input, message, List, Space, Tag, Select } from 'antd';
-import { EditOutlined, DeleteOutlined, PlusOutlined, CheckCircleOutlined } from '@ant-design/icons';
-import MainLayout from '../../layout/MainLayout';
-import { getDetailAcc, UpdateEmail, UpdatePassword, UpdatePhone, AddBankAccount, UpdateBankAccount, DeleteBankAccount, SetDefaultBankAccount, UpdateUser } from '../../services/AuthenServices';
+import { Card, Row, Col, Button, Typography, Divider, Modal, Form, Input, message } from 'antd';
+import { getDetailAcc, UpdatePassword, UpdateUser } from '../../services/AuthenServices';
 import FormSelect from '../../components/form-select/FormSelect';
 import DatePickerCustomOld from '../../components/datepicker/DatePickerCustomOld';
-import { Dayjs } from "dayjs"
 import "./index.scss";
 const { Title, Text } = Typography;
 
