@@ -9,5 +9,7 @@ export const routesConfig = {
     
     //Common Component
     testComponent: "/test-component",
-    thongTinTaiKhoan: "/thong-tin-tai-khoan"
+    thongTinTaiKhoan: "/thong-tin-tai-khoan",
+    // theo dõi đơnhàng\
+    theoDoiDonHang: "/theo-doi-don-hang"
 }

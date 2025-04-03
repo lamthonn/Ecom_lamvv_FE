@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, Row, Col, Button, Typography, Divider, Modal, Form, Input, message, List, Space, Tag, Select } from 'antd';
 import { EditOutlined, DeleteOutlined, PlusOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import MainLayout from '../../layout/MainLayout';
-import { getDetailAcc, UpdateEmail, UpdatePassword, UpdatePhone, AddBankAccount, UpdateBankAccount, DeleteBankAccount, SetDefaultBankAccount } from '../../services/AuthenServices';
+import { getDetailAcc, UpdateEmail, UpdatePassword, UpdatePhone, AddBankAccount, UpdateBankAccount, DeleteBankAccount, SetDefaultBankAccount, UpdateUser } from '../../services/AuthenServices';
 import FormSelect from '../../components/form-select/FormSelect';
 import DatePickerCustomOld from '../../components/datepicker/DatePickerCustomOld';
 import { Dayjs } from "dayjs"
@@ -22,7 +22,7 @@ interface AccountData {
     ten: string;
     ngay_sinh: string;
     dia_chi: string;
-    gioi_tinh: number;
+    gioi_tinh: boolean;
     so_dien_thoai: string;
     email: string;
 }
@@ -99,11 +99,20 @@ const AccountInfo: React.FC = () => {
   };
 
 
-  const handleUpdate = (values: any) => {
-    // Cập nhật dữ liệu người dùng
-    setAccountData(values);
-    setIsModalVisible(false);
-    message.success('Cập nhật thông tin thành công!');
+  const handleUpdate = async (values: any) => {
+    console.log(values)
+      await UpdateUser(values)
+        .then((response) => {
+            if(response)
+                message.success('Cập nhật thông tin thành công!');
+                handleCancel();
+                getData();
+        })
+        .catch((error) => {
+            message.error('Cập nhật thông tin thất bại. Vui lòng thử lại.');
+            console.error(error);
+        });
+
   };
 
   return (
@@ -116,7 +125,11 @@ const AccountInfo: React.FC = () => {
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
             }}
         >
-        <Divider orientation="left">Thông tin tài khoản</Divider>
+        <Divider orientation="left">Thông tin tài khoản 
+        <Button type="default" onClick={handleUpdateInfo} style={{marginLeft: "34px"}}>
+                Cập nhật thông tin
+            </Button>
+        </Divider>
 
         {/* Họ tên */}
         <Row
@@ -166,7 +179,7 @@ const AccountInfo: React.FC = () => {
             <Col>
             <Text strong>Ngày sinh</Text>
             <br />
-            <Text>{accountData?.gioi_tinh ?? 'Chưa có dữ liệu'}</Text>
+            <Text>{accountData?.ngay_sinh ?? "Chưa có dữ liệu" }</Text>
             </Col>
         </Row>
 
@@ -179,7 +192,7 @@ const AccountInfo: React.FC = () => {
             <Col>
             <Text strong>Giới tính</Text>
             <br />
-            <Text>{accountData?.gioi_tinh ?? 'Chưa có dữ liệu'}</Text>
+            <Text>{accountData?.gioi_tinh == null ? "Chưa có dữ liệu" : accountData.gioi_tinh ? "Nam" : "Nữ"}</Text>
             </Col>
         </Row>
 
@@ -193,15 +206,6 @@ const AccountInfo: React.FC = () => {
             <Text strong>Địa chỉ</Text>
             <br />
             <Text>{accountData?.dia_chi ?? 'Chưa có dữ liệu'}</Text>
-            </Col>
-        </Row>
-
-        {/* Nút Cập nhật thông tin */}
-        <Row style={{ marginTop: '20px' }}>
-            <Col>
-            <Button type="primary" onClick={handleUpdateInfo}>
-                Cập nhật thông tin
-            </Button>
             </Col>
         </Row>
 
@@ -266,8 +270,8 @@ const AccountInfo: React.FC = () => {
           >
             <FormSelect label="Giới tính" style={{ width: '100%' }} 
                 options={[
-                    {label: "Nam", value: "1"},
-                    {label: "Nữ", value: "0"},
+                    {label: "Nam", value: true},
+                    {label: "Nữ", value: false},
                 ]}
                 selectType='normal'
                 placeholder='Chọn giới tính'

@@ -48,3 +48,7 @@ export const DeleteBankAccount: (id: any) => Promise<AxiosResponse<any>> = (id: 
 export const SetDefaultBankAccount: (id: string) => Promise<AxiosResponse<any>> = (id: string) => {
   return axiosConfig.put(`/api/ngan-hang/${id}/set-default`);
 };
+
+export const UpdateUser: (body: any) => Promise<AxiosResponse<any>> = (body: any) => {
+  return axiosConfig.put("/api/Authen/UpdateUser", body);
+};
