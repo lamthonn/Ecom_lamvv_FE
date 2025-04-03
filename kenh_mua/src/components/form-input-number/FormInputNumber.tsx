@@ -40,8 +40,11 @@ const FormInputNumber: FunctionComponent<FormInputNumberProps> = ({
 }) => {
 
   const handleClear = () => {
-    onChange ? onChange(null, '') : null;
+    if (onChange) {
+      onChange(null, '');
+    }
   };
+  
 
   const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
     const invalidChars = ["e", "E", "+"];

@@ -19,3 +19,36 @@ export const loginAdmin: (body: any) => Promise<AxiosResponse<any> | null> = asy
 export const refreshToken: (body: any) => Promise<AxiosResponse<any>> = (body: any) => {
   return axiosCustom.post("/api/Authen/RefreshToken/refresh-token", body);
 };
+
+
+export const UpdatePassword: (body: any) => Promise<AxiosResponse<any>> = (body: any) => {
+  return axiosConfig.put("/api/Authen/UpdatePassword", body);
+};
+
+export const UpdateEmail: (body: any) => Promise<AxiosResponse<any>> = (body: any) => {
+  return axiosConfig.put("/api/Authen/UpdateEmail", body);
+};
+
+export const UpdatePhone: (body: any) => Promise<AxiosResponse<any>> = (body: any) => {
+  return axiosConfig.put("/api/Authen/UpdatePhone", body);
+};
+export const getDetailAcc: () => Promise<AxiosResponse<any>> = () => {
+  return axiosConfig.get("/api/Authen/getDetailAcc");
+};
+// ngân hàng
+export const AddBankAccount: (body: any) => Promise<AxiosResponse<any>> = (body: any) => {
+  return axiosConfig.post("/api/ngan-hang/add-bank-account", body);
+};
+export const UpdateBankAccount: (body: any) => Promise<AxiosResponse<any>> = (body: any) => {
+  return axiosConfig.put("/api/ngan-hang", body);
+};
+export const DeleteBankAccount: (id: any) => Promise<AxiosResponse<any>> = (id: any) => {
+  return axiosConfig.delete(`/api/ngan-hang/${id}`);
+};
+export const SetDefaultBankAccount: (id: string) => Promise<AxiosResponse<any>> = (id: string) => {
+  return axiosConfig.put(`/api/ngan-hang/${id}/set-default`);
+};
+
+export const UpdateUser: (body: any) => Promise<AxiosResponse<any>> = (body: any) => {
+  return axiosConfig.put("/api/Authen/UpdateUser", body);
+};

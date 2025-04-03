@@ -10,6 +10,8 @@ import TrangChu from "../pages/trang-chu";
 import CuaHang from "../pages/cua-hang";
 import GioHang from "../pages/gio-hang";
 import ChiTietSanPham from "../pages/cua-hang/chi-tiet-san-pham/chi-tiet";
+import AccountInfo from "../pages/thong-tin-tai-khoan";
+import OrderTrackingPage from "../pages/theo-doi-don-hang";
 import ThanhToan from "../pages/thanh-toan";
 
 export const router = createBrowserRouter([
@@ -72,6 +74,22 @@ export const router = createBrowserRouter([
     element: (
       <MainLayout breadcrumb={["Trang chủ", "Test component"]}>
         <TestComponent />
+      </MainLayout>
+    )
+  },
+  {
+    path: routesConfig.thongTinTaiKhoan,
+    element: (
+      <MainLayout breadcrumb={["Thông tin tài khoản"]}>
+        <AccountInfo />
+      </MainLayout>
+    )
+  },
+  {
+    path: routesConfig.theoDoiDonHang,
+    element: (
+      <MainLayout breadcrumb={["Theo dõi đơn hàng"]}>
+        <OrderTrackingPage />
       </MainLayout>
     )
   },
