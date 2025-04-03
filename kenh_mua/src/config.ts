@@ -24,3 +24,11 @@ export const menuItem :MenuProps["items"] = [
       label: "Giỏ hàng",
     },
   ];
+
+
+  export const ConvertNumberToVND = (value:number) => {
+    return value.toLocaleString("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    });
+  }

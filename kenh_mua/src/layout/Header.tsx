@@ -1,11 +1,18 @@
-import { Avatar, Button, Dropdown, Menu, MenuProps, Space, Tooltip } from "antd";
+import {
+  Avatar,
+  Button,
+  Dropdown,
+  Menu,
+  MenuProps,
+  Space,
+  Tooltip,
+} from "antd";
 import { Header } from "antd/es/layout/layout";
-import React, { FC, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { menuItem } from "../config";
 import { useNavigate } from "react-router-dom";
 import { routesConfig } from "../routes/routes";
 import {
-  DownOutlined,
   ShoppingCartOutlined,
   UserOutlined,
 } from "@ant-design/icons";
@@ -13,19 +20,40 @@ import ShowToast from "../components/show-toast/ShowToast";
 import LoginPage from "../pages/login";
 import ButtonCustom from "../components/button/button";
 import RegisterPage from "../pages/register";
+import { getDetailAcc } from "../services/AuthenServices";
 type HeaderLayoutProps = {
-  setLoading?:(va:boolean) => void
-}
-const HeaderLayout: React.FC<HeaderLayoutProps> = ({setLoading}) => {
+  setLoading?: (va: boolean) => void;
+};
+const HeaderLayout: React.FC<HeaderLayoutProps> = ({ setLoading }) => {
   const navigate = useNavigate();
   const [auth, setAuth] = useState<any>();
+  const [user, setUser] = useState<any>();
+  // Hàm lấy dữ liệu tài khoản
+  const getData = async () => {
+    await getDetailAcc()
+      .then((response: any) => {
+        setUser(response.data);
+      })
+      .catch((error: any) => {
+        ShowToast(
+          "error",
+          "Thông báo",
+          "Không thể lấy thông tin tài khoản. Vui lòng thử lại sau",
+          3
+        );
+      });
+  };
 
-  useEffect(()=> {
-    const checkAuth = localStorage.getItem("auth")
-    if(checkAuth){
+  useEffect(() => {
+    getData();
+  }, []);
+
+  useEffect(() => {
+    const checkAuth = localStorage.getItem("auth");
+    if (checkAuth) {
       setAuth(checkAuth);
     }
-  },[])
+  }, []);
   //xác thực
   const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
   const [isLoginModalVisibleReg, setIsLoginModalVisibleReg] = useState(false);
@@ -55,7 +83,6 @@ const HeaderLayout: React.FC<HeaderLayoutProps> = ({setLoading}) => {
     localStorage.removeItem("auth");
     ShowToast("success", "Đăng xuất thành công", "Hẹn gặp lại bạn sau!");
     navigate("/");
-
   };
 
   const items: MenuProps["items"] = [
@@ -63,8 +90,8 @@ const HeaderLayout: React.FC<HeaderLayoutProps> = ({setLoading}) => {
       label: <>Thông tin tài khoản</>,
       key: "0",
       onClick: () => {
-        navigate("/thong-tin-tai-khoan")
-      }
+        navigate("/thong-tin-tai-khoan");
+      },
     },
     {
       label: <>Đơn hàng</>,
@@ -117,25 +144,41 @@ const HeaderLayout: React.FC<HeaderLayoutProps> = ({setLoading}) => {
               }}
             />
           </Tooltip>
-          {
-            auth ? (<Dropdown menu={{ items }} trigger={["click"]}>
+          {auth ? (
+            <Dropdown menu={{ items }} trigger={["click"]}>
               <a onClick={(e) => e.preventDefault()}>
                 <Space style={{ color: "white" }}>
                   <Avatar icon={<UserOutlined />} />
-                  User Name
+                  {user ? user.ten : "Username"}
                 </Space>
               </a>
-            </Dropdown>) : (<div style={{display:"flex", gap:"8px"}}>
-              <ButtonCustom text="Đăng nhập" style={{backgroundColor:"var(--color-primary-9)"}} onClick={()=> setIsLoginModalVisible(true)}/> 
-              <Button onClick={()=> setIsLoginModalVisibleReg(true)}>Đăng ký</Button> 
-            </div>)
-          }
-          
+            </Dropdown>
+          ) : (
+            <div style={{ display: "flex", gap: "8px" }}>
+              <ButtonCustom
+                text="Đăng nhập"
+                style={{ backgroundColor: "var(--color-primary-9)" }}
+                onClick={() => setIsLoginModalVisible(true)}
+              />
+              <Button onClick={() => setIsLoginModalVisibleReg(true)}>
+                Đăng ký
+              </Button>
+            </div>
+          )}
         </div>
       </Header>
 
-      <LoginPage isOpen={isLoginModalVisible} onClose={() => setIsLoginModalVisible(false)} handleCloseModal={setIsLoginModalVisible} setLoading={setLoading}/>
-      <RegisterPage isOpen={isLoginModalVisibleReg} onClose={() => setIsLoginModalVisibleReg(false)} setLoading={setLoading}/>
+      <LoginPage
+        isOpen={isLoginModalVisible}
+        onClose={() => setIsLoginModalVisible(false)}
+        handleCloseModal={setIsLoginModalVisible}
+        setLoading={setLoading}
+      />
+      <RegisterPage
+        isOpen={isLoginModalVisibleReg}
+        onClose={() => setIsLoginModalVisibleReg(false)}
+        setLoading={setLoading}
+      />
     </div>
   );
 };

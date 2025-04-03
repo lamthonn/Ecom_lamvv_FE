@@ -90,7 +90,7 @@ const GioHang: React.FC = () => {
   const handleSelectAllChange = (e: any) => {
     const checked = e.target.checked;
     setSelectAll(checked);
-  
+
     if (checked) {
       // Chọn tất cả các hàng
       const allSelectedRows = dataGioHang.map((item) => item); // Hoặc bạn có thể chỉ lấy id: dataGioHang.map((item) => item.id);
@@ -112,14 +112,20 @@ const GioHang: React.FC = () => {
       dataIndex: "checked",
       render: (checked: boolean, record: any, index: number) => (
         <Checkbox
-          checked={selectedRows.some((row) => row.id === record.id)} // Kiểm tra xem record có trong selectedRows không
+          checked={selectedRows.some((row) => row.id === record.id)}
           onChange={(e) => {
             const isChecked = e.target.checked;
             setSelectedRows((prevSelectedRows: any[]) => {
               if (isChecked) {
-                // Thêm record vào selectedRows nếu chưa có
-                if (!prevSelectedRows.some((row) => row.id === record.id)) {
-                  return [...prevSelectedRows, record];
+                // Thêm record từ dataGioHang (sử dụng dataGioHang)
+                const selectedItem = dataGioHang.find(
+                  (item) => item.id === record.id
+                );
+                if (
+                  selectedItem &&
+                  !prevSelectedRows.some((row) => row.id === record.id)
+                ) {
+                  return [...prevSelectedRows, selectedItem];
                 }
                 return prevSelectedRows;
               } else {
@@ -285,28 +291,33 @@ const GioHang: React.FC = () => {
     san_pham: item.san_pham,
     checked: item.checked,
   }));
-  useEffect(()=> {
-    console.log(selectedRows);
-    
-  },[selectedRows])
+
   const tinhTongTienGioHang = (gioHang: any[]) => {
     let tongTien = 0;
-  
+
     gioHang.forEach((item) => {
       if (item) {
         // Kiểm tra xem có khuyến mãi không
-        const gia = item.san_pham.khuyen_mai !== null ? item.san_pham.khuyen_mai : item.san_pham.gia;
-  
+        const gia =
+          item.san_pham.khuyen_mai !== null
+            ? item.san_pham.khuyen_mai
+            : item.san_pham.gia;
+
         // Tính tổng tiền cho sản phẩm được chọn
         tongTien += gia * item.so_luong;
       }
     });
-  
+
     return tongTien.toLocaleString("vi-VN", {
       style: "currency",
       currency: "VND",
     });
   };
+
+  useEffect(() => {
+    console.log(selectedRows);
+    
+  }, [selectedRows]);
   return (
     <div className="gio-hang-chi-tiet">
       <Spin spinning={loading}>
@@ -317,16 +328,31 @@ const GioHang: React.FC = () => {
           pagination={false}
         />
         <Affix offsetBottom={10}>
-          <Card style={{ backgroundColor: "var(--color-primary-5)",  }}>
-            <div style={{display:"flex",justifyContent:"space-between"}}>
-            <div className="gio-hang-trai"> 
-              <Checkbox onClick={handleSelectAllChange} style={{ color:"white", fontSize:"16px"}}>Chọn tất cả</Checkbox>
-            </div>
-            <div className="gio-hang-phai" >
-              <Typography.Text style={{ color:"white", fontSize:"16px"}}>Tổng cộng ({selectedRows.length} sản phẩm): </Typography.Text>
-              <Typography.Text style={{ color:"white", fontSize:"20px"}}>{tinhTongTienGioHang(selectedRows)}</Typography.Text>
-              <Button onClick={()=> {navigate(routesConfig.thanhToan, { state: selectedRows })}}>THANH TOÁN</Button>
-            </div>
+          <Card style={{ backgroundColor: "var(--color-primary-5)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div className="gio-hang-trai">
+                <Checkbox
+                  onClick={handleSelectAllChange}
+                  style={{ color: "white", fontSize: "16px" }}
+                >
+                  Chọn tất cả
+                </Checkbox>
+              </div>
+              <div className="gio-hang-phai">
+                <Typography.Text style={{ color: "white", fontSize: "16px" }}>
+                  Tổng cộng ({selectedRows.length} sản phẩm):{" "}
+                </Typography.Text>
+                <Typography.Text style={{ color: "white", fontSize: "20px" }}>
+                  {tinhTongTienGioHang(selectedRows)}
+                </Typography.Text>
+                <Button
+                  onClick={() => {
+                    navigate(routesConfig.thanhToan, { state: selectedRows });
+                  }}
+                >
+                  THANH TOÁN
+                </Button>
+              </div>
             </div>
           </Card>
         </Affix>
