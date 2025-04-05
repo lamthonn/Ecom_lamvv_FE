@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
-import { Table, Button, Modal, Typography, Timeline, Tag } from 'antd';
-import { EyeOutlined } from '@ant-design/icons';
+import React, { useEffect, useState } from 'react';
+import { Table, Button, Modal, Typography, Timeline, Tag, Tooltip, Tabs, Rate, Input } from 'antd';
+import { CloseCircleOutlined, EyeOutlined, StarOutlined, WarningOutlined } from '@ant-design/icons';
 import './index.scss';
 import TableCustom from '../../components/table/table-custom';
-import { GetAllDonHangByUser } from '../../services/DonHangServices';
+import { ChuyenTrangThaiDonHang, GetAllDonHangByUser } from '../../services/DonHangServices';
 import dayjs from "dayjs";
+import ShowToast from '../../components/show-toast/ShowToast';
+import TabPane from 'antd/es/tabs/TabPane';
+import { DanhGia } from '../../services/DanhGia';
 
 const { Title, Text } = Typography;
 
@@ -14,77 +17,18 @@ const statusMap: any = {
   2: 'Đang xử lý',
   3: 'Đang giao',
   4: 'Đã giao',
+  5: "Đã hủy/Hoàn hàng/Hoàn tiền"
 };
 
 // Dữ liệu mẫu (có thể thay thế bằng dữ liệu từ API)
-const ordersData = [
-  {
-    id: '123e4567-e89b-12d3-a456-426614174000',
-    ma_don_hang: 'DH001',
-    ngay_mua: '2025-04-01T10:00:00Z',
-    tong_tien: 1500000,
-    thanh_tien: 1500000,
-    trang_thai: 4, // Đã giao
-    so_dien_thoai: '0123456789',
-    dia_chi: '123 Đường Láng, Đống Đa, Hà Nội',
-    chi_tiet_don_hang: [
-      {
-        id: '223e4567-e89b-12d3-a456-426614174001',
-        san_pham: { ten_san_pham: 'Máy xay sinh tố' },
-        so_luong: 1,
-        don_gia: 1200000,
-        thanh_tien: 1200000,
-      },
-      {
-        id: '323e4567-e89b-12d3-a456-426614174002',
-        san_pham: { ten_san_pham: 'Bộ nồi inox' },
-        so_luong: 1,
-        don_gia: 300000,
-        thanh_tien: 300000,
-      },
-    ],
-    timeline: [
-      { status: 'Đã đặt hàng', date: '2025-04-01 10:00' },
-      { status: 'Đang xử lý', date: '2025-04-01 12:00' },
-      { status: 'Đang giao', date: '2025-04-02 09:00' },
-      { status: 'Đã giao', date: '2025-04-03 15:00' },
-    ],
-  },
-  {
-    id: '223e4567-e89b-12d3-a456-426614174003',
-    ma_don_hang: 'DH002',
-    ngay_mua: '2025-04-02T14:00:00Z',
-    tong_tien: 800000,
-    thanh_tien: 800000,
-    trang_thai: 2, // Đang xử lý
-    so_dien_thoai: '0987654321',
-    dia_chi: '456 Nguyễn Trãi, Thanh Xuân, Hà Nội',
-    chi_tiet_don_hang: [
-      {
-        id: '423e4567-e89b-12d3-a456-426614174004',
-        san_pham: { ten_san_pham: 'Đèn bàn LED' },
-        so_luong: 1,
-        don_gia: 800000,
-        thanh_tien: 800000,
-      },
-    ],
-    timeline: [
-      { status: 'Đã đặt hàng', date: '2025-04-02 14:00' },
-      { status: 'Đang xử lý', date: '2025-04-02 16:00' },
-    ],
-  },
-];
-const handleCancelOrder = (id: string) => {
-  // Implement the logic to cancel the order
-  // message.success('Đơn hàng đã được hủy');
-  // setIsModalVisible(false);
-  // setSelectedOrder(null);
-};
 
 const OrderTrackingPage = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
-
+  const [wannaGetData, setWannaGetData] = useState<any>(null);
+  const [rating, setRating] = useState<number>(0);
+  const [reviewText, setReviewText] = useState<string>("");
+  const [isModalVisibleRate, setIsModalVisibleRate] = useState(false);
   const columns = [
     {
       title: 'Mã đơn hàng',
@@ -118,27 +62,29 @@ const OrderTrackingPage = () => {
       key: 'action',
       dataIndex: "chiTietDonHangs",
       render: (_: any, record: any) => {
-        console.log(record)
         return (
-          <>
-            <Button
-              type="primary"
-              icon={<EyeOutlined />}
-              onClick={() => handleViewDetails(record)}
-            >
-              Xem chi tiết
-            </Button>
-            {record.trang_thai == 1 && <Button
-              type="primary"
-              icon={<EyeOutlined />}
-              onClick={() => handleCancelOrder(record.id)}
-            >
-              Hủy đơn hàng
-            </Button>}
-          </>
+          <div style={{ textAlign: "center"}}>
+            <Tooltip title="Xem chi tiết">
+              <EyeOutlined className='hover' style={{padding: "8px"}} onClick={() => handleViewDetails(record)} />
+            </Tooltip>
+            {record.trang_thai == 1 &&
+            <Tooltip className='hover' title="Hủy đơn hàng">
+              <CloseCircleOutlined style={{padding: "8px"}} onClick={() => handleCancelOrder(record.id)} />
+            </Tooltip>
+            }
+            {record.trang_thai === 4 && !record.is_danh_gia && (
+              <Tooltip title="Đánh giá đơn hàng">
+                <StarOutlined className="hover" style={{ padding: "8px", color: "#fadb14" }} onClick={() => handleReview(record)} />
+              </Tooltip>
+            )}
+          </div>
       )}
     },
   ];
+  const handleReview = (order: any) => {
+    setSelectedOrder(order);
+    setIsModalVisibleRate(true);
+  };
 
   const handleViewDetails = (order: any) => {
     setSelectedOrder(order);
@@ -149,7 +95,37 @@ const OrderTrackingPage = () => {
     setIsModalVisible(false);
     setSelectedOrder(null);
   };
-
+  const handleCancelOrder = async (id: string) => {
+    Modal.confirm({
+      title: "Hủy đơn hàng",
+      centered: true,
+      icon: <WarningOutlined />,
+      content: <p>Bạn chắc chắn muốn hủy đơn hàng</p>,
+      className: "modal-custom danger",
+      okButtonProps: {
+        className: "btn btn-filled--danger",
+      },
+      cancelButtonProps: {
+        className: "btn btn-outlined",
+      },
+      okText: "Xác nhận",
+      cancelText: "Huỷ",
+      onOk: async () => {
+        await ChuyenTrangThaiDonHang(id, 5)
+        .then(res => {
+          ShowToast("success", "Thông báo", "Hủy đơn hàng thành công!");
+          setIsModalVisible(false);
+          setSelectedOrder(null);
+          setWannaGetData(Math.random())
+        })
+        .catch(err => {
+          ShowToast("error", "Thông báo", "Hủy đơn hàng không thành công!");
+        })
+      },
+      onCancel: () => {},
+    });
+    
+  };
   // const getData = async () => {
   //   //setLoading(true);
   //   await GetAllDonHangByUser()
@@ -185,17 +161,103 @@ const OrderTrackingPage = () => {
   
     return timelineItems;
   };
+  const [activeTab, setActiveTab] = useState<string>("0");
+  const [isFirstRender, setIsFirstRender] = useState(true);
+  const [productReviews, setProductReviews] = useState<any>({}); 
+  const handleSubmitReview = async () => {
+    // Sau khi nhấn "Gửi đánh giá", cập nhật thông tin đánh giá cho từng sản phẩm
+    const updatedReviews = selectedOrder?.chiTietDonHangs.map((product: any) => ({
+      id: product.id,
+      rating: product.rating,
+      reviewText: product.reviewText,
+    }));
+    console.log("kakakak:: ", updatedReviews);
+    
+    // Cập nhật lại biến productReviews
+    setProductReviews({
+      ...productReviews,
+      [selectedOrder.id]: updatedReviews,
+    });
+    await DanhGia(selectedOrder.id, updatedReviews)
+    .then(res => {      
+      setIsModalVisibleRate(false);
+      ShowToast("success", "Thông báo", "Đánh giá thành công!")
+      setWannaGetData(Math.random())
+    })
+    .catch(err => {
+      ShowToast("error", "Thông báo", "Đánh giá thất bại!")
+    })
 
+    // Đóng modal sau khi gửi đánh giá
+  };
+
+  useEffect(() => {
+    if (isFirstRender) {
+      setIsFirstRender(false);
+    } else {
+      setWannaGetData(Math.random());
+    }
+  }, [activeTab]);
   return (
     <section className="order-tracking-page">
       <Title level={2}>Theo dõi đơn hàng</Title>
+      <Tabs activeKey={activeTab} onChange={setActiveTab}>
+        <TabPane tab="Tất cả" key="0" />
+        <TabPane tab="Đã đặt hàng" key="1" />
+        <TabPane tab="Đang xử lý" key="2" />
+        <TabPane tab="Đang giao" key="3" />
+        <TabPane tab="Đã giao" key="4" />
+        <TabPane tab="Đã hủy/Hoàn hàng/Hoàn tiền" key="5" />
+      </Tabs>
+      <Modal
+        title="Đánh giá sản phẩm"
+        visible={isModalVisibleRate}
+        onOk={handleSubmitReview}
+        onCancel={() => setIsModalVisibleRate(false)}
+        okText="Gửi đánh giá"
+        cancelText="Hủy"
+      >
+        {selectedOrder?.chiTietDonHangs?.map((product: any) => (
+          <div key={product.id} style={{ marginBottom: 16 }}>
+            <Text strong>{product.ten_san_pham}</Text>
+            <Rate
+              value={product.rating || 0}
+              onChange={(value) => {
+                const updatedProducts = selectedOrder.chiTietDonHangs.map((p: any) =>
+                  p.id === product.id ? { ...p, rating: value } : p
+                );
+                setSelectedOrder({ ...selectedOrder, chiTietDonHangs: updatedProducts });
+              }}
+            />
+            <Input.TextArea
+              rows={2}
+              placeholder="Nhập nhận xét..."
+              value={product.reviewText || ""}
+              onChange={(e) => {
+                const updatedProducts = selectedOrder.chiTietDonHangs.map((p: any) =>
+                  p.id === product.id ? { ...p, reviewText: e.target.value } : p
+                );
+                setSelectedOrder({ ...selectedOrder, chiTietDonHangs: updatedProducts });
+              }}
+            />
+          </div>
+        ))}
+      </Modal>
+
       <TableCustom
         columns={columns}
         rowKey="id"
-        get_list_url='/api/don-hang/get-don-hang-by-user'   
+        get_list_url={`/api/don-hang/get-don-hang-by-user?trang_thai=${activeTab}`}
         isEditOne={false}
         isDeleteOne={false}
         isViewDetail={false}
+        isShowButtonAdd={false}
+        isShowButtonEdit={false}
+        add_button={false}
+        export_button={false}
+        delete_button={false}
+        isCheckable={false}
+        wan_get_data={wannaGetData}
       />
 
       {/* Modal chi tiết đơn hàng */}
@@ -270,13 +332,15 @@ const OrderTrackingPage = () => {
             </Timeline>
 
             {selectedOrder.trang_thai === 1 && (
-              <Button
-                type="dashed"
-                onClick={() => handleCancelOrder(selectedOrder.id)}
-                style={{ marginTop: 20 }}
-              >
-                Hủy đơn hàng
-              </Button>
+              <div style={{textAlign: "center"}}>
+                <Button
+                  type="dashed"
+                  onClick={() => handleCancelOrder(selectedOrder.id)}
+                  style={{ marginTop: 20 }}
+                >
+                  Hủy đơn hàng
+                </Button>
+              </div>
             )}
           </div>
         )}

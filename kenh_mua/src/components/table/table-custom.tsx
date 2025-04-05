@@ -72,6 +72,8 @@ type TableCustomProps = {
 
   //search
   searchComponent?: React.ReactNode;
+  // nếu muốn get lại data, sư dụng biến random
+  wan_get_data?: number;
 };
 
 const TableCustom: React.FC<TableCustomProps> = ({
@@ -114,6 +116,7 @@ const TableCustom: React.FC<TableCustomProps> = ({
   export_url,
   param_export,
   isSearchGeneral = false,
+  wan_get_data
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [isShowModalEdit, setIsShowModalEdit] = useState<boolean>(false);
@@ -167,6 +170,11 @@ const TableCustom: React.FC<TableCustomProps> = ({
   useEffect(() => {
     getData(curentPage, pageSize);
   }, []);
+
+  useEffect(() => {
+    
+    if(wan_get_data) getData(curentPage, pageSize);
+  }, [wan_get_data]);
 
   const onShowSizeChange: PaginationProps["onShowSizeChange"] = (
     current,
