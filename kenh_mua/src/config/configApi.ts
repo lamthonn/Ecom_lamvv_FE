@@ -1,13 +1,9 @@
 import axios from "axios";
-import { log } from "console";
-import { useNavigate } from "react-router-dom";
 import { refreshToken } from "../services/AuthenServices";
 import ShowToast from "../components/show-toast/ShowToast";
-import { Modal } from "antd";
 
 
 export const BASE_URL = process.env.REACT_APP_BASE_API_URL;
-export const STRIPE_KEY = process.env.STRIPE_KEY;
 
 //api không cần xác thực
 export const axiosCustom: any = axios.create({

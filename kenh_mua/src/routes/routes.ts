@@ -8,6 +8,7 @@ export const routesConfig = {
     gioHang: "/gio-hang",
     //thanh toán
     thanhToan:"/thanh-toan",
+    thanhToanThanhCong:"/thanh-toan-thanh-cong",
     
     //Common Component
     testComponent: "/test-component",

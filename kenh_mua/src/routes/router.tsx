@@ -13,6 +13,8 @@ import ChiTietSanPham from "../pages/cua-hang/chi-tiet-san-pham/chi-tiet";
 import AccountInfo from "../pages/thong-tin-tai-khoan";
 import OrderTrackingPage from "../pages/theo-doi-don-hang";
 import ThanhToan from "../pages/thanh-toan";
+import ThanhToanThanhCong from "../pages/thanh-toan/thanh-toan-thanh-cong";
+// import ThanhToanThanhCong from "../pages/thanh-toan/thanh-toan-thanh-cong";
 
 export const router = createBrowserRouter([
   //người mua
@@ -57,6 +59,14 @@ export const router = createBrowserRouter([
     element: (
       <MainLayout breadcrumb = {["Trang chủ", "Cửa hàng", "Thanh toán"]}>
         <ThanhToan />
+      </MainLayout>
+    )
+  },
+  {
+    path: routesConfig.thanhToanThanhCong,
+    element: (
+      <MainLayout breadcrumb = {["Trang chủ", "Cửa hàng", "Thanh toán"]}>
+        <ThanhToanThanhCong />
       </MainLayout>
     )
   },

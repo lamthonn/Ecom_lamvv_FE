@@ -96,6 +96,9 @@ const HeaderLayout: React.FC<HeaderLayoutProps> = ({ setLoading }) => {
     {
       label: <>Đơn hàng</>,
       key: "1",
+      onClick: () => {
+        navigate(routesConfig.theoDoiDonHang);
+      },
     },
     {
       key: "dang-xuat",
