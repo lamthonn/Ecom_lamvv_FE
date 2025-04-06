@@ -35,12 +35,12 @@ const HeaderLayout: React.FC<HeaderLayoutProps> = ({ setLoading }) => {
         setUser(response.data);
       })
       .catch((error: any) => {
-        ShowToast(
-          "error",
-          "Thông báo",
-          "Không thể lấy thông tin tài khoản. Vui lòng thử lại sau",
-          3
-        );
+        // ShowToast(
+        //   "error",
+        //   "Thông báo",
+        //   "Không thể lấy thông tin tài khoản. Vui lòng thử lại sau",
+        //   3
+        // );
       });
   };
 
@@ -113,12 +113,12 @@ const HeaderLayout: React.FC<HeaderLayoutProps> = ({ setLoading }) => {
         style={{
           display: "flex",
           alignItems: "center",
-          backgroundColor: "var(--color-primary-5) !important",
+          backgroundColor: "var(--color-primary-4) !important",
         }}
       >
         <img
           src="/images/logo_removeBg.png"
-          alt="Delias Logo"
+          alt="G-Connect Logo"
           style={{ width: "10%", margin: "20px 0", color: "#FFF" }}
         />
         <Menu

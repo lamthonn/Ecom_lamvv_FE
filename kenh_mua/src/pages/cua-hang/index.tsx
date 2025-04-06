@@ -57,7 +57,6 @@ const CuaHang: React.FC = () => {
         },
       })
       .then((res: any) => {
-        // console.log(res.data.items);
         setProductsData(res.data.items);
         setTotal(res.data.totalRecord);
       })
