@@ -1,9 +1,11 @@
 import {
+  Avatar,
   Button,
   Carousel,
   Collapse,
   Image,
   InputNumber,
+  List,
   Radio,
   Rate,
   Splitter,
@@ -32,18 +34,26 @@ interface SanPham {
   ds_anh_san_pham: string[];
   ma_san_pham: string;
   ls_phan_loai: any[];
-  ten_san_pham:string;
-  ten_danh_muc:string;
-  gia:number;
-  khuyen_mai:number;
-  luot_ban:number;
-  duong_dan_anh_bia:string;
-  mo_ta:string;
+  ten_san_pham: string;
+  ten_danh_muc: string;
+  gia: number;
+  khuyen_mai: number;
+  luot_ban: number;
+  duong_dan_anh_bia: string;
+  mo_ta: string;
 }
 
+type DataDanhGia = {
+  danh_gia_chat_luong?: number;
+  noi_dung_danh_gia?: string;
+  ten_san_pham?: string;
+  ten_nguoi_dung?: string;
+  phan_hoi?: string;
+};
 const ChiTietSanPham: React.FC = () => {
   const { ma } = useParams<{ ma: string }>();
   const [dataDetail, setDataDetail] = useState<SanPham[]>([]);
+  const [danhGia, setDanhGia] = useState<DataDanhGia[]>([]);
   const [images, setImages] = useState<string[]>([]);
   const [rate, setRate] = useState<number>(0);
   const [auth, setAuth] = useState<any>();
@@ -63,21 +73,22 @@ const ChiTietSanPham: React.FC = () => {
   const [mau_sac, set_mau_sac] = useState<string | null>(null);
   useEffect(() => {
     GetById();
+    getDanhGia();
   }, []);
+
+  //đánh giá
 
   const GetById = async () => {
     setLoading(true);
     await axiosConfig
       .get(`api/DanhSachSanPham/get-by-ma/${ma}`)
       .then((res: any) => {
-        console.log(res.data);
-
         setDataDetail(res.data);
-        setRate(res.data.rate);
+        setRate(res.data[0].rate);
         // Xử lý ds_anh_san_pham thành mảng các đối tượng { duong_dan, ma_san_pham }
         const processedImages = res.data[0].ds_anh_san_pham.map(
           (item: any) => ({
-            duong_dan: item.duong_dan,
+            duong_dan: item,
             ma_san_pham: res.data[0].ma_san_pham,
           })
         );
@@ -99,6 +110,28 @@ const ChiTietSanPham: React.FC = () => {
       });
   };
 
+  const getDanhGia = async () => {
+    axiosConfig
+      .get(`/api/danh-gia/get-danh-gia/${ma}`)
+      .then((res: any) => {
+        console.log(res.data);
+        setDanhGia(
+          res.data.map((item: any) => {
+            return {
+              danh_gia_chat_luong: item.danh_gia_chat_luong,
+              noi_dung_danh_gia: item.noi_dung_danh_gia,
+              ten_san_pham: item.san_pham.ten_san_pham,
+              ten_nguoi_dung: item.nguoi_dung.ten,
+              phan_hoi: item.noi_dung_phan_hoi,
+            };
+          })
+        );
+      })
+      .catch((err: any) => {
+        ShowToast("error", "Thông báo", "Lấy dữ liệu thất bại", 3);
+      });
+  };
+
   const onChange: InputNumberProps["onChange"] = (value: any) => {
     setSoLuong(value);
   };
@@ -112,6 +145,7 @@ const ChiTietSanPham: React.FC = () => {
     }
   };
   const navigate = useNavigate();
+
   const handleThemGioHang = (type: "mua-ngay" | "them-gio-hang") => {
     setLoading(true);
     if (dataDetail.length > 0) {
@@ -193,14 +227,14 @@ const ChiTietSanPham: React.FC = () => {
           so_luong: soLuong,
           san_pham: {
             ...bienThePhuHop,
-            ds_anh_san_pham: bienThePhuHop.ds_anh_san_pham.map((duong_dan: string) => ({
-              duong_dan: duong_dan,
-              san_pham_id: san_pham_id,
-            })),
+            ds_anh_san_pham: bienThePhuHop.ds_anh_san_pham.map(
+              (duong_dan: string) => ({
+                duong_dan: duong_dan,
+                san_pham_id: san_pham_id,
+              })
+            ),
           },
         };
-
-        console.log("data", data);
 
         // Gọi API thêm vào giỏ hàng ở đây với data
         if (type === "them-gio-hang") {
@@ -290,10 +324,10 @@ const ChiTietSanPham: React.FC = () => {
             </Typography.Text>
 
             {/* Đánh giá */}
-            <div style={{ display: "flex", gap: 8 }}>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
               <Rate
                 disabled
-                defaultValue={rate}
+                value={rate}
                 allowHalf
                 tooltips={["Tệ", "Tạm ổn", "Ôn", "Tốt", "Xuất sắc"]}
               />
@@ -448,9 +482,52 @@ const ChiTietSanPham: React.FC = () => {
             label: "Đánh giá",
             children: (
               <div>
-                {dataDetail.length > 0
-                  ? dataDetail[0].mo_ta
-                  : "Chưa có dữ liệu"}
+                <List
+                  itemLayout="vertical"
+                  size="large"
+                  pagination={{
+                    onChange: (page) => {
+                      console.log(page);
+                    },
+                    pageSize: 3,
+                  }}
+                  dataSource={danhGia}
+                  renderItem={(item: any, index: number) => (
+                    <List.Item key={item.title}>
+                      <List.Item.Meta
+                        avatar={
+                          <Avatar
+                            src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${index}`}
+                          />
+                        }
+                        title={item.ten_nguoi_dung}
+                        description={
+                          <Rate value={item.danh_gia_chat_luong} disabled />
+                        }
+                        children={
+                          <Typography.Text>
+                            {item.ten_nguoi_dung}
+                          </Typography.Text>
+                        }
+                      />
+                      {item.noi_dung_danh_gia}
+                      {item.phan_hoi && ( // Kiểm tra nếu item.phan_hoi tồn tại
+                        <div
+                          style={{
+                            marginTop: "10px",
+                            paddingLeft: "20px",
+                            borderLeft: "2px solid #ccc",
+                          }}
+                        >
+                          <Typography.Text strong>Phản hồi:</Typography.Text>
+                          <Typography.Paragraph>
+                            {item.phan_hoi}
+                          </Typography.Paragraph>
+                        </div>
+                      )}
+                    </List.Item>
+                  )}
+                />
               </div>
             ),
           },

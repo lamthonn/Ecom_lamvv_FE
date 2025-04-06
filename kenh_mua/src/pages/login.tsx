@@ -56,7 +56,7 @@ const LoginPage: React.FC<{
     >
       <div className="login-header">
         <img
-          src="/images/logo2.png"
+          src="/images/logo_removeBg.png"
           alt="G-Connect Logo"
           style={{ width: "50%", marginLeft: "25%" }}
         />
