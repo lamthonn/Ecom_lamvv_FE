@@ -142,11 +142,12 @@ const ThanhToan: React.FC<ThanhToanProps> = ({}) => {
   };
 
 
-  const fetchCheckoutSession = async () => {
+  const fetchCheckoutSession = async (paymentMethod = "stripe") => {
     try {
         setLoading(true);
         const successUrl = "https://49c4-2405-4802-1c94-6da0-8cd-a9a-a12c-5d71.ngrok-free.app/thanh-toan-thanh-cong";
         const cancelUrl = "https://49c4-2405-4802-1c94-6da0-8cd-a9a-a12c-5d71.ngrok-free.app/trang-chu";
+        
         const dataCreateCheckoutSession = {
             successUrl: successUrl,
             cancelUrl: cancelUrl,
@@ -154,76 +155,114 @@ const ThanhToan: React.FC<ThanhToanProps> = ({}) => {
             userId: dataUser.id.toString(),
         };
 
-        // Gọi API để tạo session
-        const response = await axiosConfig.post(
-            `${BASE_URL}/api/thanh-toan/create-checkout-session`,
-            dataCreateCheckoutSession
-        );
+        // Handle different payment methods (Stripe or ZaloPay)
+        if (paymentMethod === "stripe") {
+            // Stripe logic
+            const response = await axiosConfig.post(
+                `${BASE_URL}/api/thanh-toan/create-checkout-session`,
+                dataCreateCheckoutSession
+            );
 
-        // Kiểm tra dữ liệu trả về
-        if (response.data && response.data.sessionId) {
-            const stripe = await stripePromise;
+            if (response.data && response.data.sessionId) {
+                const stripe = await stripePromise;
 
-            // Dữ liệu cho API success
-            const dataTT = {
-                stripeSessionId: response.data.sessionId,
-                successUrl: successUrl,
-                cancelUrl: cancelUrl,
-                priceInCents: tinhTongTienGioHang(dataThanhToan, true),
-                userId: dataUser.id.toString(),
-                donHang: {
-                    account_id: dataUser.id,
-                    tong_tien: tinhTongTienGioHang(dataThanhToan, true),
-                    thanh_tien: tinhTongTienGioHang(dataThanhToan, true),
-                    ds_chi_tiet_don_hang: dataThanhToan.map((item: any) => {
-                        return {
+                const dataTT = {
+                    stripeSessionId: response.data.sessionId,
+                    successUrl: successUrl,
+                    cancelUrl: cancelUrl,
+                    priceInCents: tinhTongTienGioHang(dataThanhToan, true),
+                    userId: dataUser.id.toString(),
+                    donHang: {
+                        account_id: dataUser.id,
+                        tong_tien: tinhTongTienGioHang(dataThanhToan, true),
+                        thanh_tien: tinhTongTienGioHang(dataThanhToan, true),
+                        ds_chi_tiet_don_hang: dataThanhToan.map((item: any) => ({
                             san_pham_id: item.san_pham.id,
                             so_luong: item.so_luong,
                             don_gia: item.san_pham.gia,
                             mau_sac: item.san_pham.mau_sac,
                             kich_thuoc: item.san_pham.kich_thuoc,
                             thanh_tien: item.san_pham.gia * item.so_luong,
-                        };
-                    }),
-                    tai_khoan: dataUser,
-                },
-            };
+                        })),
+                        tai_khoan: dataUser,
+                    },
+                };
 
-            console.log("dataThanhToan", dataThanhToan);
-            console.log("dataTT", dataTT);
-            debugger
-
-            // Gọi API success trước khi chuyển hướng
-            await axiosConfig.post(
-                `${BASE_URL}/api/thanh-toan/success`,
-                dataTT
-            ).then(async (res: any) => {
-                if (res.data === "Payment successful.") {
-                    ShowToast("success", "Thông báo", "Thanh toán thành công", 3);
-                    // Chuyển hướng sau khi API success thành công
-                    await stripe?.redirectToCheckout({ sessionId: response.data.sessionId })
-                        .then(() => {
-                            // Không cần xử lý thêm ở đây vì đã chuyển hướng
-                        })
-                        .catch(() => {
+                // API success before redirecting
+                await axiosConfig.post(`${BASE_URL}/api/thanh-toan/success`, dataTT)
+                    .then(async (res: any) => {
+                        if (res.data === "Payment successful.") {
+                            ShowToast("success", "Thông báo", "Thanh toán thành công", 3);
+                            await stripe?.redirectToCheckout({ sessionId: response.data.sessionId });
+                        } else {
                             ShowToast("error", "Thông báo", "Có lỗi xảy ra trong quá trình thanh toán", 3);
-                        });
-                } else {
-                    ShowToast("error", "Thông báo", "Có lỗi xảy ra trong quá trình thanh toán", 3);
-                }
-            }).catch(() => {
-                ShowToast("error", "Thông báo", "Có lỗi xảy ra trong quá trình thanh toán", 3);
-            }).finally(() => {
-                setLoading(false);
-            });
-        } else {
-            throw new Error("API không trả về sessionId");
-        }
+                        }
+                    })
+                    .catch(() => ShowToast("error", "Thông báo", "Có lỗi xảy ra trong quá trình thanh toán", 3))
+                    .finally(() => setLoading(false));
+            } else {
+                throw new Error("API không trả về sessionId");
+            }
+        } else if (paymentMethod === "zalopay") {
+          // Call the API to create a ZaloPay order
+          const dataTT = {
+                account_id: dataUser.id,
+                tong_tien: tinhTongTienGioHang(dataThanhToan, true),
+                thanh_tien: tinhTongTienGioHang(dataThanhToan, true),
+                ds_chi_tiet_don_hang: dataThanhToan.map((item: any) => ({
+                    san_pham_id: item.san_pham.id,
+                    so_luong: item.so_luong,
+                    don_gia: item.san_pham.gia,
+                    mau_sac: item.san_pham.mau_sac,
+                    kich_thuoc: item.san_pham.kich_thuoc,
+                    thanh_tien: item.san_pham.gia * item.so_luong,
+                })),
+                tai_khoan: dataUser,
+          };
+          const response = await axiosConfig.post(
+              `${BASE_URL}/api/thanh-toan/zalo-create-order`,
+              dataTT
+          );
+          console.log("ZaloPay response:", response); // Debugger
+          debugger
+          if (response.data && response.data.paymentUrl) {
+              // Redirect to ZaloPay payment page
+              window.location.href = response.data.paymentUrl;
+          } else {
+              ShowToast("error", "Thông báo", "Có lỗi xảy ra trong quá trình tạo đơn hàng ZaloPay", 3);
+          }
+      } else if (paymentMethod == "2") {
+        const dataTT = {
+          account_id: dataUser.id,
+          tong_tien: tinhTongTienGioHang(dataThanhToan, true),
+          thanh_tien: tinhTongTienGioHang(dataThanhToan, true),
+          ds_chi_tiet_don_hang: dataThanhToan.map((item: any) => ({
+              san_pham_id: item.san_pham.id,
+              so_luong: item.so_luong,
+              don_gia: item.san_pham.gia,
+              mau_sac: item.san_pham.mau_sac,
+              kich_thuoc: item.san_pham.kich_thuoc,
+              thanh_tien: item.san_pham.gia * item.so_luong,
+          })),
+          tai_khoan: dataUser,
+        };
+        const response = await axiosConfig.post(
+            `${BASE_URL}/api/thanh-toan/create-order-tien-mat`,
+            dataTT
+        );
+        if (response.data) {
+          ShowToast("success", "Thông báo", "Đặt hàng thành công", 3);
+          window.location.href = "/";
+      } else {
+          ShowToast("error", "Thông báo", "Có lỗi xảy ra trong quá trình tạo đơn hàng ZaloPay", 3);
+      }
+      }
     } catch (error) {
         ShowToast("error", "Thông báo", "Không thể tạo phiên thanh toán. Vui lòng thử lại.", 3);
         setLoading(false);
     }
 };
+
 
   if (dataUser) {
     return (
@@ -309,11 +348,16 @@ const ThanhToan: React.FC<ThanhToanProps> = ({}) => {
             <ButtonCustom
               text="THANH TOÁN"
               onClick={() => {
-                if(PhuongThucThanhToan === "0") {
-                    fetchCheckoutSession(); // Gọi hàm để chuyển hướng đến Stripe Checkout
+                if (PhuongThucThanhToan === "0") {
+                  fetchCheckoutSession("stripe"); // Trigger Stripe payment
+                } else if (PhuongThucThanhToan === "1") {
+                  fetchCheckoutSession("zalopay"); // Trigger ZaloPay payment
+                } else if(PhuongThucThanhToan === "2") {
+                  fetchCheckoutSession("2");
                 }
               }}
             />
+
           </div>
         </div>
       </Spin>
