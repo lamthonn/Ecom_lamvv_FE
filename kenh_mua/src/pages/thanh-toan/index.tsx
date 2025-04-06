@@ -179,15 +179,19 @@ const ThanhToan: React.FC<ThanhToanProps> = ({}) => {
                         return {
                             san_pham_id: item.san_pham.id,
                             so_luong: item.so_luong,
-                            don_gia: item.san_pham.don_gia,
+                            don_gia: item.san_pham.gia,
                             mau_sac: item.san_pham.mau_sac,
                             kich_thuoc: item.san_pham.kich_thuoc,
-                            thanh_tien: item.san_pham.don_gia * item.so_luong,
+                            thanh_tien: item.san_pham.gia * item.so_luong,
                         };
                     }),
                     tai_khoan: dataUser,
                 },
             };
+
+            console.log("dataThanhToan", dataThanhToan);
+            console.log("dataTT", dataTT);
+            debugger
 
             // Gọi API success trước khi chuyển hướng
             await axiosConfig.post(

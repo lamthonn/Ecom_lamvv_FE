@@ -43,7 +43,7 @@ const MainLayout: React.FC<{
         </Content>
 
         <Footer style={{ textAlign: "center" }}>
-          Delias ©{new Date().getFullYear()} Created by Lâm Vũ
+        G-Connect ©{new Date().getFullYear()} Created by Lâm Vũ
         </Footer>
       </Spin>
     </Layout>

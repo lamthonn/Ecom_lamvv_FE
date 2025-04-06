@@ -25,97 +25,146 @@ interface CustomJwtPayload extends JwtPayload {
   id?: string;
 }
 
+interface SanPham {
+  id: string;
+  mau_sac?: string;
+  size?: string;
+  ds_anh_san_pham: string[];
+  ma_san_pham: string;
+  ls_phan_loai: any[];
+  ten_san_pham:string;
+  ten_danh_muc:string;
+  gia:number;
+  khuyen_mai:number;
+  luot_ban:number;
+  duong_dan_anh_bia:string;
+  mo_ta:string;
+}
+
 const ChiTietSanPham: React.FC = () => {
   const { ma } = useParams<{ ma: string }>();
-  const [dataDetail, setDataDetail] = useState<any>([]);
+  const [dataDetail, setDataDetail] = useState<SanPham[]>([]);
   const [images, setImages] = useState<string[]>([]);
   const [rate, setRate] = useState<number>(0);
- const [auth, setAuth] = useState<any>();
- const [loading, setLoading] = useState<boolean>(false);
+  const [auth, setAuth] = useState<any>();
+  const [loading, setLoading] = useState<boolean>(false);
   useEffect(() => {
     const token = localStorage.getItem("auth");
     if (token) {
       var user = jwtDecode<CustomJwtPayload>(JSON.parse(token).token);
       if (user) {
-        setAuth(user)
+        setAuth(user);
       }
     }
   }, []);
   //thông tin mua
-  const [soLuong, setSoLuong] = useState<number>(1)
-  const [kich_thuoc, set_kich_thuoc] = useState<string | null>(null)
-  const [mau_sac, set_mau_sac] = useState<string | null>(null)
+  const [soLuong, setSoLuong] = useState<number>(1);
+  const [kich_thuoc, set_kich_thuoc] = useState<string | null>(null);
+  const [mau_sac, set_mau_sac] = useState<string | null>(null);
   useEffect(() => {
     GetById();
   }, []);
 
   const GetById = async () => {
-    setLoading(true)
+    setLoading(true);
     await axiosConfig
       .get(`api/DanhSachSanPham/get-by-ma/${ma}`)
       .then((res: any) => {
+        console.log(res.data);
+
         setDataDetail(res.data);
         setRate(res.data.rate);
+        // Xử lý ds_anh_san_pham thành mảng các đối tượng { duong_dan, ma_san_pham }
+        const processedImages = res.data[0].ds_anh_san_pham.map(
+          (item: any) => ({
+            duong_dan: item.duong_dan,
+            ma_san_pham: res.data[0].ma_san_pham,
+          })
+        );
+
+        // Thêm ảnh bìa vào đầu danh sách
         setImages([
-          res.data[0].duong_dan_anh_bia,
-          ...res.data[0].ds_anh_san_pham,
+          {
+            duong_dan: res.data[0].duong_dan_anh_bia,
+            ma_san_pham: res.data[0].ma_san_pham,
+          },
+          ...processedImages,
         ]);
       })
       .catch((err: any) => {
         ShowToast("error", "Thông báo", "Lấy dữ liệu thất bại", 3);
       })
-      .finally(()=> {
-        setLoading(false)
-      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   const onChange: InputNumberProps["onChange"] = (value: any) => {
-    setSoLuong(value)
+    setSoLuong(value);
   };
 
-  const handleChangeBienThe = (items:any, selected:any) => {
-    if(items.ten_phan_loai === "mau-sac"){
-      set_mau_sac(selected)
+  const handleChangeBienThe = (items: any, selected: any) => {
+    if (items.ten_phan_loai === "mau-sac") {
+      set_mau_sac(selected);
     }
-    if(items.ten_phan_loai === "size"){
-      set_kich_thuoc(selected)
+    if (items.ten_phan_loai === "size") {
+      set_kich_thuoc(selected);
     }
-  }
-const navigate = useNavigate();
-  const handleThemGioHang = (type:"mua-ngay" | "them-gio-hang") => {
+  };
+  const navigate = useNavigate();
+  const handleThemGioHang = (type: "mua-ngay" | "them-gio-hang") => {
     setLoading(true);
     if (dataDetail.length > 0) {
       const pl = dataDetail[0].ls_phan_loai;
-      if(pl.length === 2){
-        if(mau_sac === null || mau_sac === undefined){
-          ShowToast("warning","Thông báo", "Bạn chưa chọn màu sắc sản phẩm", 3);
+      if (pl.length === 2) {
+        if (mau_sac === null || mau_sac === undefined) {
+          ShowToast(
+            "warning",
+            "Thông báo",
+            "Bạn chưa chọn màu sắc sản phẩm",
+            3
+          );
           return 0;
         }
-        if(kich_thuoc === null || kich_thuoc === undefined){
-          ShowToast("warning","Thông báo", "Bạn chưa chọn kích thước sản phẩm", 3);
+        if (kich_thuoc === null || kich_thuoc === undefined) {
+          ShowToast(
+            "warning",
+            "Thông báo",
+            "Bạn chưa chọn kích thước sản phẩm",
+            3
+          );
           return 0;
         }
-      }
-      else{
-        if(pl.length === 1){
-          if(pl[0].ten_phan_loai === "mau-sac"){
-            if(mau_sac === null || mau_sac === undefined){
-              ShowToast("warning","Thông báo", "Bạn chưa chọn màu sắc sản phẩm", 3);
+      } else {
+        if (pl.length === 1) {
+          if (pl[0].ten_phan_loai === "mau-sac") {
+            if (mau_sac === null || mau_sac === undefined) {
+              ShowToast(
+                "warning",
+                "Thông báo",
+                "Bạn chưa chọn màu sắc sản phẩm",
+                3
+              );
               return 0;
             }
           }
 
-          if(pl[0].ten_phan_loai === "size"){
-            if(kich_thuoc === null || kich_thuoc === undefined){
-              ShowToast("warning","Thông báo", "Bạn chưa chọn kích thước sản phẩm", 3);
+          if (pl[0].ten_phan_loai === "size") {
+            if (kich_thuoc === null || kich_thuoc === undefined) {
+              ShowToast(
+                "warning",
+                "Thông báo",
+                "Bạn chưa chọn kích thước sản phẩm",
+                3
+              );
               return 0;
             }
           }
         }
       }
       // Tìm biến thể phù hợp dựa trên mau_sac và kich_thuoc đã chọn
-      let bienThePhuHop;
-  
+      let bienThePhuHop: SanPham | undefined;
+
       if (mau_sac && kich_thuoc) {
         // Nếu cả màu sắc và kích thước đều được chọn, tìm biến thể phù hợp
         bienThePhuHop = dataDetail.find(
@@ -135,32 +184,40 @@ const navigate = useNavigate();
         // Nếu không có màu sắc và kích thước nào được chọn, lấy biến thể đầu tiên
         bienThePhuHop = dataDetail[0];
       }
-  
+
       if (bienThePhuHop) {
         const san_pham_id = bienThePhuHop.id;
         const data = {
           nguoi_dung_id: auth.id,
           san_pham_id: san_pham_id,
           so_luong: soLuong,
-          san_pham: bienThePhuHop
+          san_pham: {
+            ...bienThePhuHop,
+            ds_anh_san_pham: bienThePhuHop.ds_anh_san_pham.map((duong_dan: string) => ({
+              duong_dan: duong_dan,
+              san_pham_id: san_pham_id,
+            })),
+          },
         };
+
+        console.log("data", data);
+
         // Gọi API thêm vào giỏ hàng ở đây với data
-        if(type === "them-gio-hang"){
+        if (type === "them-gio-hang") {
           axiosConfig
-          .post("api/gio-hang/created", data)
-          .then(() => {
-            ShowToast("success", "Thông báo", "Thêm giỏ hàng thành công", 3);
-          })
-          .catch(() => {
-            ShowToast("error", "Thông báo", "Có lỗi xảy ra", 3);
-          })
-          .finally(() => {
-            setLoading(false);
-          });
-        }else{
-          navigate(routesConfig.thanhToan, {state:[data]})
+            .post("/api/gio-hang/created", data)
+            .then(() => {
+              ShowToast("success", "Thông báo", "Thêm giỏ hàng thành công", 3);
+            })
+            .catch(() => {
+              ShowToast("error", "Thông báo", "Có lỗi xảy ra", 3);
+            })
+            .finally(() => {
+              setLoading(false);
+            });
+        } else {
+          navigate(routesConfig.thanhToan, { state: [data] });
         }
-        
       } else {
         ShowToast("error", "Lỗi", "Không tìm thấy biến thể phù hợp", 3);
         setLoading(false);
@@ -210,7 +267,7 @@ const navigate = useNavigate();
                     objectPosition: "center",
                     border: "1px solid rgb(214, 214, 214)",
                   }}
-                  src={`${BASE_URL}/${item || "default-image.jpg"}`}
+                  src={`${BASE_URL}/${item.duong_dan || "default-image.jpg"}`}
                 />
               </div>
             ))}
@@ -307,7 +364,9 @@ const navigate = useNavigate();
                                 label: x,
                               };
                             })}
-                            onChange={(value:any) => {handleChangeBienThe(item, value.target.value)}}
+                            onChange={(value: any) => {
+                              handleChangeBienThe(item, value.target.value);
+                            }}
                             optionType="button"
                             buttonStyle="solid"
                           />
@@ -321,7 +380,12 @@ const navigate = useNavigate();
             <Typography.Text>Số lượng:</Typography.Text>
             <div style={{ display: "flex", gap: 8, width: "50%" }}>
               {/* Số lượng */}
-              <FormInputNumber min={1} max={50} onChange={onChange} value={soLuong}/>
+              <FormInputNumber
+                min={1}
+                max={50}
+                onChange={onChange}
+                value={soLuong}
+              />
               <Button
                 key={"1"}
                 style={{
@@ -330,20 +394,24 @@ const navigate = useNavigate();
                 }}
                 variant="solid"
                 type="primary"
-                onClick={()=> {
-                  handleThemGioHang("mua-ngay")
+                onClick={() => {
+                  handleThemGioHang("mua-ngay");
                 }}
               >
                 MUA NGAY
               </Button>
             </div>
             {/* button */}
-            <Button key={"2"} style={{ height: "34px", width: "50%" }} onClick={()=> handleThemGioHang("them-gio-hang")}>
+            <Button
+              key={"2"}
+              style={{ height: "34px", width: "50%" }}
+              onClick={() => handleThemGioHang("them-gio-hang")}
+            >
               THÊM VÀO GIỎ HÀNG
             </Button>
 
             {/* Các phương thức thanh toán */}
-            <div style={{ display: "flex", gap: 8, alignItems:"center" }}>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
               <Image width={"20%"} src="/images/stripe.png" />
               <Image width={"20%"} src="/images/ZaloPay_Logo.png" />
               <Image width={"20%"} src="/images/COD.jpg" />

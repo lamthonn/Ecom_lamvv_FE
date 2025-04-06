@@ -79,18 +79,18 @@ export const router = createBrowserRouter([
       </MainLayout>
     )
   },
-  {
-    path: routesConfig.testComponent,
-    element: (
-      <MainLayout breadcrumb={["Trang chủ", "Test component"]}>
-        <TestComponent />
-      </MainLayout>
-    )
-  },
+  // {
+  //   path: routesConfig.testComponent,
+  //   element: (
+  //     <MainLayout breadcrumb={["Trang chủ", "Test component"]}>
+  //       <TestComponent />
+  //     </MainLayout>
+  //   )
+  // },
   {
     path: routesConfig.thongTinTaiKhoan,
     element: (
-      <MainLayout breadcrumb={["Thông tin tài khoản"]}>
+      <MainLayout breadcrumb={["Trang chủ","Thông tin tài khoản"]}>
         <AccountInfo />
       </MainLayout>
     )
@@ -98,7 +98,7 @@ export const router = createBrowserRouter([
   {
     path: routesConfig.theoDoiDonHang,
     element: (
-      <MainLayout breadcrumb={["Theo dõi đơn hàng"]}>
+      <MainLayout breadcrumb={["Trang chủ","Theo dõi đơn hàng"]}>
         <OrderTrackingPage />
       </MainLayout>
     )

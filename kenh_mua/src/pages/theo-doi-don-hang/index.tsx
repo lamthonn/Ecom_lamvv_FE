@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Table, Button, Modal, Typography, Timeline, Tag, Tooltip, Tabs, Rate, Input } from 'antd';
 import { CloseCircleOutlined, EyeOutlined, StarOutlined, WarningOutlined } from '@ant-design/icons';
 import './index.scss';
 import TableCustom from '../../components/table/table-custom';
-import { ChuyenTrangThaiDonHang, GetAllDonHangByUser } from '../../services/DonHangServices';
+import { ChuyenTrangThaiDonHang, } from '../../services/DonHangServices';
 import dayjs from "dayjs";
 import ShowToast from '../../components/show-toast/ShowToast';
 import TabPane from 'antd/es/tabs/TabPane';
 import { DanhGia } from '../../services/DanhGia';
+import { ConvertNumberToVND } from '../../config';
 
 const { Title, Text } = Typography;
 
@@ -26,8 +27,6 @@ const OrderTrackingPage = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [wannaGetData, setWannaGetData] = useState<any>(null);
-  const [rating, setRating] = useState<number>(0);
-  const [reviewText, setReviewText] = useState<string>("");
   const [isModalVisibleRate, setIsModalVisibleRate] = useState(false);
   const columns = [
     {
@@ -67,7 +66,7 @@ const OrderTrackingPage = () => {
             <Tooltip title="Xem chi tiết">
               <EyeOutlined className='hover' style={{padding: "8px"}} onClick={() => handleViewDetails(record)} />
             </Tooltip>
-            {record.trang_thai == 1 &&
+            {record.trang_thai === 1 &&
             <Tooltip className='hover' title="Hủy đơn hàng">
               <CloseCircleOutlined style={{padding: "8px"}} onClick={() => handleCancelOrder(record.id)} />
             </Tooltip>
@@ -126,24 +125,6 @@ const OrderTrackingPage = () => {
     });
     
   };
-  // const getData = async () => {
-  //   //setLoading(true);
-  //   await GetAllDonHangByUser()
-  //     .then((response) => {
-  //       setAccountData(response.data);
-  //     })
-  //     .catch((error) => {
-  //       message.error('Không thể lấy thông tin tài khoản. Vui lòng thử lại sau.');
-  //       console.error(error);
-  //     })
-  //     .finally(() => {
-  //       setLoading(false);
-  //     });
-  // };
-
-  // useEffect(() => {
-  //   getData();
-  // }, []);
 
   const generateTimeline = (currentStatus: number) => {
     const timelineItems = [];
@@ -154,7 +135,7 @@ const OrderTrackingPage = () => {
           <Text strong>{statusMap[statusCode]}</Text>
           <br />
           {/* Assuming you want the current date/time for each step */}
-          <Text>{statusCode == currentStatus ? dayjs().format('DD/MM/YYYY HH:mm') : ""}</Text>
+          <Text>{statusCode === currentStatus ? dayjs().format('DD/MM/YYYY HH:mm') : ""}</Text>
         </Timeline.Item>
       );
     }
@@ -163,15 +144,22 @@ const OrderTrackingPage = () => {
   };
   const [activeTab, setActiveTab] = useState<string>("0");
   const [isFirstRender, setIsFirstRender] = useState(true);
-  const [productReviews, setProductReviews] = useState<any>({}); 
+  const [productReviews, setProductReviews] = useState<any>({});
+ 
   const handleSubmitReview = async () => {
     // Sau khi nhấn "Gửi đánh giá", cập nhật thông tin đánh giá cho từng sản phẩm
-    const updatedReviews = selectedOrder?.chiTietDonHangs.map((product: any) => ({
-      id: product.id,
-      rating: product.rating,
-      reviewText: product.reviewText,
-    }));
-    console.log("kakakak:: ", updatedReviews);
+    const updatedReviews = selectedOrder?.chiTietDonHangs.map((product: any) => {
+      console.log("Đánh giá sản phẩm:", product);
+      
+      return ({
+        id: product.id,
+        rating: product.rating,
+        reviewText: product.reviewText,
+      })
+    });
+
+    console.log("Đánh giá sản phẩm:", updatedReviews);
+    
     
     // Cập nhật lại biến productReviews
     setProductReviews({
@@ -198,9 +186,15 @@ const OrderTrackingPage = () => {
       setWannaGetData(Math.random());
     }
   }, [activeTab]);
+
+  useEffect(() => { 
+    console.log("selectedOrder", selectedOrder);
+    
+  }
+  , [selectedOrder]);
   return (
     <section className="order-tracking-page">
-      <Title level={2}>Theo dõi đơn hàng</Title>
+      {/* <Title level={2}>Theo dõi đơn hàng</Title> */}
       <Tabs activeKey={activeTab} onChange={setActiveTab}>
         <TabPane tab="Tất cả" key="0" />
         <TabPane tab="Đã đặt hàng" key="1" />
@@ -211,6 +205,8 @@ const OrderTrackingPage = () => {
       </Tabs>
       <Modal
         title="Đánh giá sản phẩm"
+        centered
+        width={1200}
         visible={isModalVisibleRate}
         onOk={handleSubmitReview}
         onCancel={() => setIsModalVisibleRate(false)}
@@ -218,7 +214,7 @@ const OrderTrackingPage = () => {
         cancelText="Hủy"
       >
         {selectedOrder?.chiTietDonHangs?.map((product: any) => (
-          <div key={product.id} style={{ marginBottom: 16 }}>
+          <div key={product.id} style={{ marginBottom: 16, display: "flex", flexDirection: "column", gap: 8 }}>
             <Text strong>{product.ten_san_pham}</Text>
             <Rate
               value={product.rating || 0}
@@ -278,10 +274,10 @@ const OrderTrackingPage = () => {
             <Text>{dayjs(selectedOrder.ngay_mua).format('DD/MM/YYYY HH:mm')}</Text>
             <br />
             <Text strong>Tổng tiền: </Text>
-            <Text>{selectedOrder.tong_tien} VNĐ</Text>
+            <Text>{ConvertNumberToVND(selectedOrder.tong_tien)}</Text>
             <br />
             <Text strong>Thành tiền: </Text>
-            <Text>{selectedOrder.thanh_tien} VNĐ</Text>
+            <Text>{ConvertNumberToVND(selectedOrder.thanh_tien)}</Text>
             <br />
             <Text strong>Số điện thoại: </Text>
             <Text>{selectedOrder.so_dien_thoai}</Text>
@@ -310,13 +306,13 @@ const OrderTrackingPage = () => {
                   title: 'Đơn giá',
                   dataIndex: 'don_gia',
                   key: 'don_gia',
-                  render: (don_gia) => `${don_gia} VNĐ`,
+                  render: (don_gia) => `${ConvertNumberToVND(don_gia) }`,
                 },
                 {
                   title: 'Thành tiền',
                   dataIndex: 'thanh_tien',
                   key: 'thanh_tien',
-                  render: (thanh_tien) => `${thanh_tien} VNĐ`,
+                  render: (thanh_tien) => `${ConvertNumberToVND(thanh_tien)}`,
                 },
               ]}
               dataSource={selectedOrder.chiTietDonHangs}
