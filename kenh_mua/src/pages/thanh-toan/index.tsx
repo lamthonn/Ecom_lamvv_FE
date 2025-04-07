@@ -192,7 +192,7 @@ const ThanhToan: React.FC<ThanhToanProps> = ({}) => {
                 await axiosConfig.post(`${BASE_URL}/api/thanh-toan/success`, dataTT)
                     .then(async (res: any) => {
                         if (res.data === "Payment successful.") {
-                            ShowToast("success", "Thông báo", "Thanh toán thành công", 3);
+                            // ShowToast("success", "Thông báo", "Thanh toán thành công", 3);
                             await stripe?.redirectToCheckout({ sessionId: response.data.sessionId });
                         } else {
                             ShowToast("error", "Thông báo", "Có lỗi xảy ra trong quá trình thanh toán", 3);
@@ -224,7 +224,6 @@ const ThanhToan: React.FC<ThanhToanProps> = ({}) => {
               dataTT
           );
           console.log("ZaloPay response:", response); // Debugger
-          debugger
           if (response.data && response.data.paymentUrl) {
               // Redirect to ZaloPay payment page
               window.location.href = response.data.paymentUrl;
